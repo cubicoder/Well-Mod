@@ -1,0 +1,32 @@
+{
+    "config.well.data": "Datos de recolección de fluido",
+    "config.well.data.tooltip": "Controla qué tipo de y cuánto fluido se pueden obtener dependiente del bioma",
+    "config.well.onlyOnePerChunk": "Limitar a un solo pozo por cada 16 bloques",
+    "config.well.onlyOnePerChunk.tooltip": "Si el valor es \"true\", todos los pozos en el area dejarán de funcionar cuando haya más de uno.",
+    "config.well.playSound": "Reproducir sonido de manivela",
+    "config.well.playSound.tooltip": "Reproducir sonido de manivela cuando alguien toma fluido de un pozo.",
+    "config.well.tankCapacity": "Capacidad de tanque de fluido",
+    "config.well.tankCapacity.tooltip": "Cuántos milicubos (mb) almacena un pozo. Dejar en 0 para desactivar.",
+
+    "block.well.black_well": "Pozo negro",
+    "block.well.blue_well": "Pozo azul",
+    "block.well.brown_well": "Pozo café",
+    "block.well.cyan_well": "Pozo cian",
+    "block.well.gray_well": "Pozo gris",
+    "block.well.green_well": "Pozo verde",
+    "block.well.light_blue_well": "Pozo celeste",
+    "block.well.lime_well": "Pozo lima",
+    "block.well.magenta_well": "Pozo magenta",
+    "block.well.orange_well": "Pozo naranja",
+    "block.well.pink_well": "Pozo roza",
+    "block.well.purple_well": "Pozo morado",
+    "block.well.red_well": "Pozo rojo",
+    "block.well.light_gray_well": "Pozo gris claro",
+    "block.well.well": "Pozo",
+    "block.well.white_well": "Pozo blanco",
+    "block.well.yellow_well": "Pozo amarillo",
+
+    "subtitle.block.well.crank": "Manivela de pozo rechina",
+    "warn.well.onePerChunk": "§l§4Ya existe un pozo apuntando hacia arriba 16 bloques alrededor de este!",
+    "warn.well.onePerChunkFlipped": "§l§4Ya existe un pozo apuntando hacia abajo 16 bloques alrededor de este!"
+}

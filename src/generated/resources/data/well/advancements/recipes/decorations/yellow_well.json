@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "well:yellow_well"
+    ]
+  },
+  "criteria": {
+    "has_well": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "well:well"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "well:yellow_well"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_well",
+      "has_the_recipe"
+    ]
+  ]
+}

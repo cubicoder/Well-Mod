@@ -1,0 +1,32 @@
+{
+    "config.well.data": "Fluid Collection Data",
+    "config.well.data.tooltip": "Handle what fluids wells collect based on biome, and how much",
+    "config.well.onlyOnePerChunk": "Limit to One Well per 16 blocks",
+    "config.well.onlyOnePerChunk.tooltip": "When set to true, all wells in the area will stop working while there's more than 1.",
+    "config.well.playSound": "Play Cranking Sound",
+    "config.well.playSound.tooltip": "Play the well cranking sound when someone takes fluid from a well.",
+    "config.well.tankCapacity": "Fluid Tank Capacity",
+    "config.well.tankCapacity.tooltip": "How many millibuckets of a fluid can wells hold? Set to 0 to disable.",
+    
+    "block.well.black_well": "Black Well",
+    "block.well.blue_well": "Blue Well",
+    "block.well.brown_well": "Brown Well",
+    "block.well.cyan_well": "Cyan Well",
+    "block.well.gray_well": "Gray Well",
+    "block.well.green_well": "Green Well",
+    "block.well.light_blue_well": "Light Blue Well",
+    "block.well.lime_well": "Lime Well",
+    "block.well.magenta_well": "Magenta Well",
+    "block.well.orange_well": "Orange Well",
+    "block.well.pink_well": "Pink Well",
+    "block.well.purple_well": "Purple Well",
+    "block.well.red_well": "Red Well",
+    "block.well.light_gray_well": "Light Gray Well",
+    "block.well.well": "Well",
+    "block.well.white_well": "White Well",
+    "block.well.yellow_well": "Yellow Well",
+    
+    "subtitle.block.well.crank": "Well crank squeaks",
+    "warn.well.onePerChunk": "§l§4Already one other right side up well within 16 blocks of this one!",
+    "warn.well.onePerChunkFlipped": "§l§4Already one other upside down well within 16 blocks of this one!"
+}

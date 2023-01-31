@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "axis=x,half=upper,upside_down=false": {
+      "model": "well:block/gray_well_roof"
+    },
+    "axis=z,half=upper,upside_down=false": {
+      "model": "well:block/gray_well_roof",
+      "y": 90
+    },
+    "axis=x,half=lower,upside_down=false": {
+      "model": "well:block/well_base"
+    },
+    "axis=z,half=lower,upside_down=false": {
+      "model": "well:block/well_base",
+      "y": 90
+    },
+    "axis=x,half=upper,upside_down=true": {
+      "model": "well:block/gray_well_roof",
+      "x": 180
+    },
+    "axis=z,half=upper,upside_down=true": {
+      "model": "well:block/gray_well_roof",
+      "x": 180,
+      "y": 90
+    },
+    "axis=x,half=lower,upside_down=true": {
+      "model": "well:block/well_base",
+      "x": 180
+    },
+    "axis=z,half=lower,upside_down=true": {
+      "model": "well:block/well_base",
+      "x": 180,
+      "y": 90
+    }
+  }
+}

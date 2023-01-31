@@ -1,0 +1,32 @@
+{
+    "config.well.data": "流体采集数据",
+    "config.well.data.tooltip": "根据生物群系处理井内收集的液体种类，以及液体数量",
+    "config.well.onlyOnePerChunk": "限制每16个方块只能有一口井",
+    "config.well.onlyOnePerChunk.tooltip": "当设置为 \"真 \"时，该地区的所有井将在超过1个时停止工作。",
+    "config.well.playSound": "播放曲柄的声音",
+    "config.well.playSound.tooltip": "当有人从井中抽取液体时，播放井的曲柄的声音。",
+    "config.well.tankCapacity": "储罐容量",
+    "config.well.tankCapacity.tooltip": "井可以容纳多少毫升的液体？设为0以禁用。",
+
+    "block.well.black_well": "黑色井",
+    "block.well.blue_well": "蓝色井",
+    "block.well.brown_well": "棕色井",
+    "block.well.cyan_well": "青色井",
+    "block.well.gray_well": "灰色井",
+    "block.well.green_well": "绿色井",
+    "block.well.light_blue_well": "淡蓝色井",
+    "block.well.lime_well": "黄绿色井",
+    "block.well.magenta_well": "品红色井",
+    "block.well.orange_well": "橙色井",
+    "block.well.pink_well": "粉红色井",
+    "block.well.purple_well": "紫色井",
+    "block.well.red_well": "红色井",
+    "block.well.light_gray_well": "淡灰色井",
+    "block.well.well": "井",
+    "block.well.white_well": "白色井",
+    "block.well.yellow_well": "黄色井",
+
+    "subtitle.block.well.crank": "井的曲柄发出吱吱声",
+    "warn.well.onePerChunk": "§l§4在这个井的16个方块内已经有一个朝右的井！",
+    "warn.well.onePerChunkFlipped": "§l§4在这个井的16个方块内已经有一个朝下的井！"
+}

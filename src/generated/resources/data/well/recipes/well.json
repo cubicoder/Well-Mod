@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RRR",
+    "/L/",
+    "SBS"
+  ],
+  "key": {
+    "R": {
+      "tag": "forge:ingots/brick"
+    },
+    "/": {
+      "tag": "forge:rods/wooden"
+    },
+    "L": {
+      "item": "minecraft:lead"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    },
+    "S": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "result": {
+    "item": "well:well"
+  }
+}

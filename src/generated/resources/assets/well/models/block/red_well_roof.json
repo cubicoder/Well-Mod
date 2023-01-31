@@ -1,0 +1,6 @@
+{
+  "parent": "well:block/template_well_roof",
+  "textures": {
+    "roof": "well:block/red_roof"
+  }
+}

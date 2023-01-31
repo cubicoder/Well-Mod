@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "well:well",
+    "well:white_well",
+    "well:orange_well",
+    "well:magenta_well",
+    "well:light_blue_well",
+    "well:yellow_well",
+    "well:lime_well",
+    "well:pink_well",
+    "well:gray_well",
+    "well:light_gray_well",
+    "well:cyan_well",
+    "well:purple_well",
+    "well:blue_well",
+    "well:brown_well",
+    "well:green_well",
+    "well:red_well",
+    "well:black_well"
+  ]
+}

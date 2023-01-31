@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "wells",
+  "ingredients": [
+    {
+      "tag": "forge:dyes/light_gray"
+    },
+    {
+      "item": "well:well"
+    }
+  ],
+  "result": {
+    "item": "well:light_gray_well"
+  }
+}
