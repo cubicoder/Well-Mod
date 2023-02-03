@@ -37,13 +37,33 @@ public class WellBlock extends BaseEntityBlock {
 	public static final BooleanProperty UPSIDE_DOWN = BooleanProperty.create("upside_down");
 	
 	public static final VoxelShape SHAPE_BASE = Shapes.join(Shapes.block(), Block.box(3.0D, 2.0D, 3.0D, 13.0D, 16.0D, 13.0D), BooleanOp.ONLY_FIRST);
-	// TODO this looks janky af and a regular box might be better
-	public static final VoxelShape SHAPE_ROOF = Shapes.or(
+	public static final VoxelShape SHAPE_INNER_SUPPORT_X = Shapes.or(
 			Block.box(7.5D, 0.0D, 1.0D, 8.5D, 15.0D, 2.0D),
 			Block.box(7.5D, 0.0D, 14.0D, 8.5D, 15.0D, 15.0D),
 			Block.box(7.5D, 7.0D, 2.0D, 8.5D, 8.0D, 14.0D),
-			Block.box(5.0D, 4.5D, 4.5D, 11.0D, 10.5D, 11.5D),
-			Block.box(0.0D, 8.0D, 0.0D, 16.0D, 16.0D, 16.0D)
+			Block.box(5.0D, 4.5D, 4.5D, 11.0D, 10.5D, 11.5D)
+	);
+	public static final VoxelShape SHAPE_INNER_SUPPORT_Z = Shapes.or(
+			Block.box(1.0D, 0.0D, 7.5D, 2.0D, 15.0D, 8.5D),
+			Block.box(14.0D, 0.0D, 7.5D, 15.0D, 15.0D, 8.5D),
+			Block.box(2.0D, 7.0D, 7.5D, 14.0D, 8.0D, 8.5D),
+			Block.box(4.5D, 4.5D, 5.0D, 11.5D, 10.5D, 11.0D)
+	);
+	public static final VoxelShape SHAPE_ROOF_X = Shapes.or(
+			Block.box(5.5D, 12.5D, 0.0D, 10.5D, 15.707D, 16.0D),
+			Block.box(2.75D, 10.5D, 0.0D, 5.5D, 13.75D, 16.0D),
+			Block.box(10.5D, 10.5D, 0.0D, 13.25D, 13.75D, 16.0D),
+			Block.box(0.0D, 8.0D, 0.0D, 2.75D, 11.25D, 16.0D),
+			Block.box(13.25D, 8.0D, 0.0D, 16.0D, 11.25D, 16.0D),
+			SHAPE_INNER_SUPPORT_X
+	);
+	public static final VoxelShape SHAPE_ROOF_Z = Shapes.or(
+			Block.box(0.0D, 12.5D, 5.5D, 16.0D, 15.707D, 10.5D),
+			Block.box(0.0D, 10.5D, 2.75D, 16.0D, 13.75D, 5.5D),
+			Block.box(0.0D, 10.5D, 10.5D, 16.0D, 13.75D, 13.25D),
+			Block.box(0.0D, 8.0D, 0.0D, 16.0D, 11.25D, 2.75D),
+			Block.box(0.0D, 8.0D, 13.25D, 16.0D, 11.25D, 16.0D),
+			SHAPE_INNER_SUPPORT_Z
 	);
 	
 	public WellBlock(MaterialColor mapColor) {
@@ -51,7 +71,7 @@ public class WellBlock extends BaseEntityBlock {
 	}
 	
 	public WellBlock(Material material, MaterialColor mapColor) {
-		this(Properties.of(material).color(mapColor).strength(3.0F, 1.5F).requiresCorrectToolForDrops().noOcclusion());
+		this(Properties.of(material).color(mapColor).strength(3.0F, 1.5F).requiresCorrectToolForDrops());
 	}
 	
 	public WellBlock(Properties properties) {
@@ -146,19 +166,11 @@ public class WellBlock extends BaseEntityBlock {
 						level.setBlock(otherPos, Blocks.AIR.defaultBlockState(), 35);
 					}
 				}
-			}/* else {
-				dropResources(state, level, pos, level.getBlockEntity(pos), player, player.getMainHandItem());
-			}*/
+			}
 		}
 
 		super.playerWillDestroy(level, pos, state, player);
 	}
-	
-	// if playerWillDestroy works as is, then this is not needed
-	/*@Override
-	public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, BlockEntity blockEntity, ItemStack tool) {
-		super.playerDestroy(level, player, pos, Blocks.AIR.defaultBlockState(), blockEntity, tool);
-	}*/
 	
 	@Override
 	public PushReaction getPistonPushReaction(BlockState state) {
@@ -166,29 +178,45 @@ public class WellBlock extends BaseEntityBlock {
 	}
 	
 	@Override
-	public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
+	public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
 		return false;
 	}
 	
 	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		return state.getValue(HALF) == DoubleBlockHalf.LOWER ? SHAPE_BASE : SHAPE_ROOF;
-	}
-	
-	/*@Override
-	public VoxelShape getInteractionShape(BlockState state, BlockGetter level, BlockPos pos) {
-		return null;
-	}*/
-	
-	@Override
-	public RenderShape getRenderShape(BlockState pState) {
+	public RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
 	}
 	
-	// TODO needed?
-	/*@Override
-	public boolean hidesNeighborFace(BlockGetter level, BlockPos pos, BlockState state, BlockState neighborState, Direction dir) {
-		return (state.getValue(HALF) == DoubleBlockHalf.UPPER) && dir != Direction.UP;
-	}*/
+	@Override
+	public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
+			return SHAPE_BASE;
+		} else if (state.getValue(AXIS) == Direction.Axis.X) {
+			return SHAPE_ROOF_X;
+		} else return SHAPE_ROOF_Z;		
+	}
+	
+	@Override
+	public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
+			return SHAPE_BASE;
+		} else if (state.getValue(AXIS) == Direction.Axis.X) {
+			return SHAPE_INNER_SUPPORT_X;
+		} else return SHAPE_INNER_SUPPORT_Z;
+	}
+	
+	@Override
+	public boolean useShapeForLightOcclusion(BlockState state) {
+		return true;
+	}
+	
+	@Override
+	public VoxelShape getInteractionShape(BlockState state, BlockGetter level, BlockPos pos) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
+			return Shapes.block();
+		} else if (state.getValue(AXIS) == Direction.Axis.X) {
+			return SHAPE_ROOF_X;
+		} else return SHAPE_ROOF_Z;	
+	}
 	
 }
