@@ -6,7 +6,12 @@ import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -23,7 +28,7 @@ public class WellBlockEntity extends TileFluidHandler {
 	
 	public WellBlockEntity(BlockPos pos, BlockState state) {
 		super(ModBlocks.WELL_BE.get(), pos, state);
-		tank.setCapacity(100000); // TODO config
+		tank = new WellFluidTank(this, 100000); // TODO config
 	}
 	
 	public static void serverTick(Level level, BlockPos pos, BlockState state, WellBlockEntity be) {
@@ -38,10 +43,15 @@ public class WellBlockEntity extends TileFluidHandler {
 		}
 		
 		if (be.fillTick <= 0 /*&& ConfigHandler.canGenerateFluid(nearbyWells)*/) { // TODO config
-			FluidStack fluidToFill = /*getFluidToFill()*/ new FluidStack(Fluids.WATER, 1000); // TODO config
-			if (fluidToFill != null) be.tank.fill(fluidToFill, FluidAction.EXECUTE);
-			be.initFillTick();
-			be.setChanged();
+			FluidStack fluidToFill = be.getFluidToFill();
+			int result = 0;
+			if (fluidToFill != null) {
+				result = be.tank.fill(fluidToFill, FluidAction.EXECUTE);
+			}
+			if (result > 0) {
+				be.initFillTick();
+				be.setChanged();
+			}
 		}
 	}
 
@@ -59,9 +69,10 @@ public class WellBlockEntity extends TileFluidHandler {
 	}
 	
 	// TODO config
-	/*protected FluidStack getFluidToFill() {
-		return ConfigHandler.getFillFluid(getBiome(), level, isUpsideDown(), nearbyWells);
-	}*/
+	protected FluidStack getFluidToFill() {
+		return new FluidStack(Fluids.WATER, 1000);
+		//return ConfigHandler.getFillFluid(getBiome(), level, isUpsideDown(), nearbyWells);
+	}
 	
 	protected void initFillTick() {
 		//fillTick = ConfigHandler.getFillDelay(getBiome(), level.random, isUpsideDown()); // TODO config
@@ -88,7 +99,7 @@ public class WellBlockEntity extends TileFluidHandler {
 	public void load(CompoundTag tag) {
 		super.load(tag);
 		fillTick = tag.getInt("FillTick");
-		nearbyWells = Math.max(1, tag.getInt("nearbyWells"));
+		nearbyWells = Math.max(1, tag.getInt("NearbyWells"));
 	}
 	
 	@Override
@@ -98,19 +109,84 @@ public class WellBlockEntity extends TileFluidHandler {
 		tag.putInt("NearbyWells", nearbyWells);
 	}
 	
-	// TODO rendering stuff
-	/*@Override
+	@Override
+	public CompoundTag getUpdateTag() {
+		return saveWithoutMetadata();
+	}
+	
+	@Override
 	public Packet<ClientGamePacketListener> getUpdatePacket() {
-		return super.getUpdatePacket();
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 	
 	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-		super.onDataPacket(net, pkt);
-	}*/
+		FluidStack oldFluid = tank.getFluid();
+		handleUpdateTag(pkt.getTag());
+		FluidStack newFluid = tank.getFluid();
+		
+		boolean wasEmpty = newFluid != null && oldFluid == null;
+		boolean wasFull = newFluid == null && oldFluid != null;
+
+		// update renderer and light level if needed
+		if (wasEmpty || wasFull || newFluid != null && newFluid.getAmount() != oldFluid.getAmount()) {
+			//if (newFluid != null) ((FluidTankSynced) tank.updateLight(newFluid);
+			//else ((FluidTankSynced) tank).updateLight(oldFluid);
+			level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
+		}
+	}
 	
 	public FluidTank getTank() {
 		return tank;
+	}
+	
+	// TODO light stuff
+	public static class WellFluidTank extends FluidTank {
+
+		private WellBlockEntity well;
+		
+		public WellFluidTank(WellBlockEntity well, int capacity) {
+			super(capacity);
+			this.well = well;
+			setValidator(fluid -> {
+				// well is upside down, only allow upside down fluids, or vice versa
+				boolean isLighterThanAir = fluid.getFluid().getAttributes().isLighterThanAir();
+				if (this.well.isUpsideDown()) {
+					return isLighterThanAir;
+				} else if (isLighterThanAir) return false;
+				
+				// no fluids that evaporate
+				if (this.well.getLevel().dimensionType().ultraWarm() && fluid.getFluid().getAttributes()
+						.doesVaporize(this.well.getLevel(), this.well.getBlockPos(), fluid))
+					return false;
+				
+				return true;
+			});
+		}
+		
+		@Override
+		public int fill(FluidStack resource, FluidAction action) {
+			// TODO stop fill from every source except the tick?
+			int fill = super.fill(resource, action);
+			if (action.execute() && fill > 0) {
+				BlockState state = well.getBlockState();
+				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, Block.UPDATE_ALL);
+				//updateLight(resource);
+			}
+			return fill;
+		}
+		
+		@Override
+		public FluidStack drain(int maxDrain, FluidAction action) {
+			FluidStack resource = super.drain(maxDrain, action);
+			if (resource != null && action.execute()) {
+				BlockState state = well.getBlockState();
+				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, Block.UPDATE_ALL);
+				//updateLight(resource);
+			}
+			return resource;
+		}
+		
 	}
 	
 }

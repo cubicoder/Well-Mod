@@ -1,8 +1,14 @@
 package cubicoder.well;
 
 import cubicoder.well.block.ModBlocks;
+import cubicoder.well.client.WellRenderer;
 import cubicoder.well.item.ModItems;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -16,11 +22,17 @@ public final class WellMod {
 		ModBlocks.init();
 		ModItems.init();
 		
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+		IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
+		modbus.addListener(this::onCommonSetup);
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> modbus.addListener(this::onClientSetup));
 	}
 
-	private void setup(final FMLCommonSetupEvent event) {
+	private void onCommonSetup(final FMLCommonSetupEvent event) {
 
+	}
+	
+	private void onClientSetup(final FMLClientSetupEvent event) {
+		event.enqueueWork(() -> BlockEntityRenderers.register(ModBlocks.WELL_BE.get(), WellRenderer::new));
 	}
 	
 	/*@Mod.EventHandler
