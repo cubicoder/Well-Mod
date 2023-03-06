@@ -34,11 +34,14 @@ public class ModBlocks {
 	public static final RegistryObject<Block> RED_WELL         = BLOCKS.register("red_well", () -> new WellBlock(MaterialColor.COLOR_RED));
 	public static final RegistryObject<Block> BLACK_WELL       = BLOCKS.register("black_well", () -> new WellBlock(MaterialColor.COLOR_BLACK));
 	
-	public static final RegistryObject<BlockEntityType<?>> WELL_BE = BLOCK_ENTITIES.register("well", 
-			() -> BlockEntityType.Builder.of(WellBlockEntity::new, WELL.get()).build(null));
+	public static final RegistryObject<BlockEntityType<WellBlockEntity>> WELL_BE = BLOCK_ENTITIES.register("well",
+			() -> BlockEntityType.Builder.of(WellBlockEntity::new, WELL.get(), WHITE_WELL.get(), ORANGE_WELL.get(),
+					MAGENTA_WELL.get(), LIGHT_BLUE_WELL.get(), YELLOW_WELL.get(), LIME_WELL.get(), PINK_WELL.get(),
+					GRAY_WELL.get(), LIGHT_GRAY_WELL.get(), CYAN_WELL.get(), PURPLE_WELL.get(), BLUE_WELL.get(),
+					BROWN_WELL.get(), GREEN_WELL.get(), RED_WELL.get(), BLACK_WELL.get()).build(null));
 	
 	public static void init() {
 		BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
-		//BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
+		BLOCK_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
 	}
 }

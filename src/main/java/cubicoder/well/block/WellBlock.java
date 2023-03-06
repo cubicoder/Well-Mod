@@ -1,7 +1,12 @@
 package cubicoder.well.block;
 
+import cubicoder.well.block.entity.WellBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -15,6 +20,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,10 +32,13 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 public class WellBlock extends BaseEntityBlock {
 
@@ -84,9 +94,14 @@ public class WellBlock extends BaseEntityBlock {
 
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-		return null; // TODO add block entity
+		return state.getValue(HALF) == DoubleBlockHalf.LOWER ? new WellBlockEntity(pos, state) : null;
 	}
-
+	
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+		return level.isClientSide ? null : createTickerHelper(type, ModBlocks.WELL_BE.get(), WellBlockEntity::serverTick);
+	}
+	
 	@Override
 	protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
 		builder.add(AXIS, HALF, UPSIDE_DOWN);
@@ -145,6 +160,7 @@ public class WellBlock extends BaseEntityBlock {
 		}*/
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
@@ -170,6 +186,43 @@ public class WellBlock extends BaseEntityBlock {
 		}
 
 		super.playerWillDestroy(level, pos, state, player);
+	}
+	
+	@Override
+	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+		if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
+			return InteractionResult.PASS;
+		}
+		
+		if (!player.getItemInHand(hand).getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
+			return InteractionResult.PASS;
+		}
+		
+		if (level.isClientSide) {
+			return InteractionResult.SUCCESS;
+		}
+		
+		BlockEntity be = level.getBlockEntity(pos);
+		if (be instanceof WellBlockEntity) {
+			WellBlockEntity well = (WellBlockEntity) be;
+			
+			boolean delayFlag = true;
+			boolean fillingItem = FluidUtil.tryFillContainer(player.getItemInHand(hand), well.getTank(), Integer.MAX_VALUE, player, false).success;
+			if (fillingItem) {
+				// only delay if drawing from the well with a bucket-like object
+				if (well.delayUntilNextBucket > 0) delayFlag = false;
+			}
+			
+			if (delayFlag && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection())) {
+				if (/*ConfigHandler.playSound && */fillingItem) { // TODO config
+					level.playSound(null, pos.above(), SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.25F, 1); // TODO sound
+					well.delayUntilNextBucket = 32;
+				}
+				return InteractionResult.SUCCESS;
+			}
+		}
+		
+		return InteractionResult.PASS;
 	}
 	
 	@Override

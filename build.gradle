@@ -38,6 +38,10 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', "${mod_id}"
+            
+            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 well {
@@ -52,6 +56,10 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', "${mod_id}"
+            
+            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 well {
@@ -69,6 +77,10 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', "${mod_id}"
+            
+            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 well {
@@ -82,6 +94,10 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            
+            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             args '--mod', "${mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
@@ -123,6 +139,20 @@ dependencies {
     
     implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
     implementation fg.deobf("curse.maven:configured-457570:${configured_fileid}")
+    
+    implementation fg.deobf("curse.maven:pipez-443900:3819249")
+    //implementation fg.deobf("curse.maven:portable-tanks-503920:4024684")
+    //implementation fg.deobf("curse.maven:supermartijn642s-core-lib-454372:3863129")
+    //implementation fg.deobf("curse.maven:supermartijn642s-config-lib-438332:3862966")
+    implementation fg.deobf("curse.maven:largefluidtank-291006:4074087")
+    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4059979")
+    implementation fg.deobf("curse.maven:cofh-core-69162:4385215")
+    implementation fg.deobf("curse.maven:thermal-foundation-222880:4382339")
+    implementation fg.deobf("curse.maven:thermal-expansion-69163:4382343")
+    implementation fg.deobf("curse.maven:thermal-innovation-291737:4382344")
+    implementation fg.deobf("curse.maven:thermal-dynamics-227443:4391159")
+    implementation fg.deobf("curse.maven:patchouli-306770:3846086")
+    implementation fg.deobf("curse.maven:itank-256991:3697465")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
