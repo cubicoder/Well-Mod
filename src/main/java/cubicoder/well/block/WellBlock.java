@@ -1,9 +1,9 @@
 package cubicoder.well.block;
 
 import cubicoder.well.block.entity.WellBlockEntity;
+import cubicoder.well.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -214,7 +214,7 @@ public class WellBlock extends BaseEntityBlock {
 			
 			if (delayFlag && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection())) {
 				if (/*ConfigHandler.playSound && */fillingItem) { // TODO config
-					level.playSound(null, pos.above(), SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.25F, 1); // TODO sound
+					level.playSound(null, pos.above(), ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.25F, 1);
 					well.delayUntilNextBucket = 32;
 				}
 				return InteractionResult.SUCCESS;

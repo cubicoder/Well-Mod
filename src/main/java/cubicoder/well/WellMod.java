@@ -3,6 +3,7 @@ package cubicoder.well;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.client.WellRenderer;
 import cubicoder.well.item.ModItems;
+import cubicoder.well.sound.ModSounds;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -21,6 +22,7 @@ public final class WellMod {
 	public WellMod() {
 		ModBlocks.init();
 		ModItems.init();
+		ModSounds.init();
 		
 		IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
 		modbus.addListener(this::onCommonSetup);

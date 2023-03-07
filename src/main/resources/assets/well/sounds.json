@@ -1,6 +1,6 @@
 {
     "block.well.crank": {
-        "category": "blocks",
+        "category": "block",
         "sounds": ["well:crank"],
         "subtitle": "subtitle.block.well.crank"
     }
