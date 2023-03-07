@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -47,33 +48,19 @@ public class WellBlock extends BaseEntityBlock {
 	public static final BooleanProperty UPSIDE_DOWN = BooleanProperty.create("upside_down");
 	
 	public static final VoxelShape SHAPE_BASE = Shapes.join(Shapes.block(), Block.box(3.0D, 2.0D, 3.0D, 13.0D, 16.0D, 13.0D), BooleanOp.ONLY_FIRST);
-	public static final VoxelShape SHAPE_INNER_SUPPORT_X = Shapes.or(
+	public static final VoxelShape SHAPE_INNER_SUPPORT = Shapes.or(
 			Block.box(7.5D, 0.0D, 1.0D, 8.5D, 15.0D, 2.0D),
 			Block.box(7.5D, 0.0D, 14.0D, 8.5D, 15.0D, 15.0D),
 			Block.box(7.5D, 7.0D, 2.0D, 8.5D, 8.0D, 14.0D),
 			Block.box(5.0D, 4.5D, 4.5D, 11.0D, 10.5D, 11.5D)
 	);
-	public static final VoxelShape SHAPE_INNER_SUPPORT_Z = Shapes.or(
-			Block.box(1.0D, 0.0D, 7.5D, 2.0D, 15.0D, 8.5D),
-			Block.box(14.0D, 0.0D, 7.5D, 15.0D, 15.0D, 8.5D),
-			Block.box(2.0D, 7.0D, 7.5D, 14.0D, 8.0D, 8.5D),
-			Block.box(4.5D, 4.5D, 5.0D, 11.5D, 10.5D, 11.0D)
-	);
-	public static final VoxelShape SHAPE_ROOF_X = Shapes.or(
+	public static final VoxelShape SHAPE_ROOF = Shapes.or(
 			Block.box(5.5D, 12.5D, 0.0D, 10.5D, 15.707D, 16.0D),
 			Block.box(2.75D, 10.5D, 0.0D, 5.5D, 13.75D, 16.0D),
 			Block.box(10.5D, 10.5D, 0.0D, 13.25D, 13.75D, 16.0D),
 			Block.box(0.0D, 8.0D, 0.0D, 2.75D, 11.25D, 16.0D),
 			Block.box(13.25D, 8.0D, 0.0D, 16.0D, 11.25D, 16.0D),
-			SHAPE_INNER_SUPPORT_X
-	);
-	public static final VoxelShape SHAPE_ROOF_Z = Shapes.or(
-			Block.box(0.0D, 12.5D, 5.5D, 16.0D, 15.707D, 10.5D),
-			Block.box(0.0D, 10.5D, 2.75D, 16.0D, 13.75D, 5.5D),
-			Block.box(0.0D, 10.5D, 10.5D, 16.0D, 13.75D, 13.25D),
-			Block.box(0.0D, 8.0D, 0.0D, 16.0D, 11.25D, 2.75D),
-			Block.box(0.0D, 8.0D, 13.25D, 16.0D, 11.25D, 16.0D),
-			SHAPE_INNER_SUPPORT_Z
+			SHAPE_INNER_SUPPORT
 	);
 	
 	public WellBlock(MaterialColor mapColor) {
@@ -243,19 +230,19 @@ public class WellBlock extends BaseEntityBlock {
 	@Override
 	public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
-			return SHAPE_BASE;
+			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_BASE) : SHAPE_BASE;
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
-			return SHAPE_ROOF_X;
-		} else return SHAPE_ROOF_Z;		
+			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_ROOF) : SHAPE_ROOF;
+		} else return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
 	}
 	
 	@Override
 	public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
-			return SHAPE_BASE;
+			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_BASE) : SHAPE_BASE;
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
-			return SHAPE_INNER_SUPPORT_X;
-		} else return SHAPE_INNER_SUPPORT_Z;
+			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_INNER_SUPPORT) : SHAPE_INNER_SUPPORT;
+		} else return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_INNER_SUPPORT)) : flipShapeXZ(SHAPE_INNER_SUPPORT);
 	}
 	
 	@Override
@@ -268,8 +255,54 @@ public class WellBlock extends BaseEntityBlock {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
 			return Shapes.block();
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
-			return SHAPE_ROOF_X;
-		} else return SHAPE_ROOF_Z;	
+			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_ROOF) : SHAPE_ROOF;
+		} else return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
+	}
+
+	@Override
+	public BlockState rotate(BlockState state, Rotation rotation) {
+		switch (rotation) {
+		case COUNTERCLOCKWISE_90:
+		case CLOCKWISE_90:
+			switch ((Direction.Axis) state.getValue(AXIS)) {
+			case Z:
+				return state.setValue(AXIS, Direction.Axis.X);
+			case X:
+				return state.setValue(AXIS, Direction.Axis.Z);
+			default:
+				return state;
+			}
+		default:
+			return state;
+		}
 	}
 	
+	/**
+	 * Flips the VoxelShape from the X axis to the Z axis, or vice versa.
+	 * @param shape the shape to be flipped
+	 * @return the flipped VoxelShape
+	 */
+	public static VoxelShape flipShapeXZ(VoxelShape shape) {
+		VoxelShape[] buffer = new VoxelShape[] { shape, Shapes.empty() };
+		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+			buffer[1] = Shapes.or(buffer[1], Shapes.create(minZ, minY, minX, maxZ, maxY, maxX));
+		});
+		
+		return buffer[1];
+	}
+	
+	/**
+	 * Flips the VoxelShape upside down.
+	 * @param shape the shape to be flipped
+	 * @return the flipped VoxelShape
+	 */
+	public static VoxelShape flipShapeUpsideDown(VoxelShape shape) {
+		VoxelShape[] buffer = new VoxelShape[] { shape, Shapes.empty() };
+		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+			buffer[1] = Shapes.or(buffer[1], Shapes.create(minX, 1 - maxY, minZ, maxX, 1 - minY, maxZ));
+		});
+		
+		return buffer[1];
+	}
+
 }
