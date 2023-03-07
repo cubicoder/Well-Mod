@@ -175,6 +175,18 @@ public class WellBlock extends BaseEntityBlock {
 		super.playerWillDestroy(level, pos, state, player);
 	}
 	
+	@SuppressWarnings("deprecation")
+	@Override
+	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+		if (!state.is(newState.getBlock())) {
+			BlockEntity be = level.getBlockEntity(pos);
+			if (be instanceof WellBlockEntity) {
+				((WellBlockEntity) be).countNearbyWells(e -> e.nearbyWells--);
+			}
+			super.onRemove(state, level, pos, newState, isMoving);
+		}
+	}
+	
 	@Override
 	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
 		if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
@@ -196,7 +208,7 @@ public class WellBlock extends BaseEntityBlock {
 			boolean delayFlag = true;
 			boolean fillingItem = FluidUtil.tryFillContainer(player.getItemInHand(hand), well.getTank(), Integer.MAX_VALUE, player, false).success;
 			if (fillingItem) {
-				// only delay if drawing from the well with a bucket-like object
+				// only delay if drawing from the well with a fluid item
 				if (well.delayUntilNextBucket > 0) delayFlag = false;
 			}
 			
