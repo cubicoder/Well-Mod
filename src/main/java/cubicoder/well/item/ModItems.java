@@ -15,23 +15,23 @@ public class ModItems {
 
 public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, WellMod.MODID);
 	
-	public static final RegistryObject<BlockItem> WELL = fromBlock(ModBlocks.WELL);
-	public static final RegistryObject<BlockItem> WHITE_WELL = fromBlock(ModBlocks.WHITE_WELL);
-	public static final RegistryObject<BlockItem> ORANGE_WELL = fromBlock(ModBlocks.ORANGE_WELL);
-	public static final RegistryObject<BlockItem> MAGENTA_WELL = fromBlock(ModBlocks.MAGENTA_WELL);
-	public static final RegistryObject<BlockItem> LIGHT_BLUE_WELL = fromBlock(ModBlocks.LIGHT_BLUE_WELL);
-	public static final RegistryObject<BlockItem> YELLOW_WELL = fromBlock(ModBlocks.YELLOW_WELL);
-	public static final RegistryObject<BlockItem> LIME_WELL = fromBlock(ModBlocks.LIME_WELL);
-	public static final RegistryObject<BlockItem> PINK_WELL = fromBlock(ModBlocks.PINK_WELL);
-	public static final RegistryObject<BlockItem> GRAY_WELL = fromBlock(ModBlocks.GRAY_WELL);
-	public static final RegistryObject<BlockItem> LIGHT_GRAY_WELL = fromBlock(ModBlocks.LIGHT_GRAY_WELL);
-	public static final RegistryObject<BlockItem> CYAN_WELL = fromBlock(ModBlocks.CYAN_WELL);
-	public static final RegistryObject<BlockItem> PURPLE_WELL = fromBlock(ModBlocks.PURPLE_WELL);
-	public static final RegistryObject<BlockItem> BLUE_WELL = fromBlock(ModBlocks.BLUE_WELL);
-	public static final RegistryObject<BlockItem> BROWN_WELL = fromBlock(ModBlocks.BROWN_WELL);
-	public static final RegistryObject<BlockItem> GREEN_WELL = fromBlock(ModBlocks.GREEN_WELL);
-	public static final RegistryObject<BlockItem> RED_WELL = fromBlock(ModBlocks.RED_WELL);
-	public static final RegistryObject<BlockItem> BLACK_WELL = fromBlock(ModBlocks.BLACK_WELL);
+	public static final RegistryObject<BlockItem> WELL             = fromBlock(ModBlocks.WELL);
+	public static final RegistryObject<BlockItem> WHITE_WELL       = fromColoredWell(ModBlocks.WHITE_WELL);
+	public static final RegistryObject<BlockItem> ORANGE_WELL      = fromColoredWell(ModBlocks.ORANGE_WELL);
+	public static final RegistryObject<BlockItem> MAGENTA_WELL     = fromColoredWell(ModBlocks.MAGENTA_WELL);
+	public static final RegistryObject<BlockItem> LIGHT_BLUE_WELL  = fromColoredWell(ModBlocks.LIGHT_BLUE_WELL);
+	public static final RegistryObject<BlockItem> YELLOW_WELL      = fromColoredWell(ModBlocks.YELLOW_WELL);
+	public static final RegistryObject<BlockItem> LIME_WELL        = fromColoredWell(ModBlocks.LIME_WELL);
+	public static final RegistryObject<BlockItem> PINK_WELL        = fromColoredWell(ModBlocks.PINK_WELL);
+	public static final RegistryObject<BlockItem> GRAY_WELL        = fromColoredWell(ModBlocks.GRAY_WELL);
+	public static final RegistryObject<BlockItem> LIGHT_GRAY_WELL  = fromColoredWell(ModBlocks.LIGHT_GRAY_WELL);
+	public static final RegistryObject<BlockItem> CYAN_WELL        = fromColoredWell(ModBlocks.CYAN_WELL);
+	public static final RegistryObject<BlockItem> PURPLE_WELL      = fromColoredWell(ModBlocks.PURPLE_WELL);
+	public static final RegistryObject<BlockItem> BLUE_WELL        = fromColoredWell(ModBlocks.BLUE_WELL);
+	public static final RegistryObject<BlockItem> BROWN_WELL       = fromColoredWell(ModBlocks.BROWN_WELL);
+	public static final RegistryObject<BlockItem> GREEN_WELL       = fromColoredWell(ModBlocks.GREEN_WELL);
+	public static final RegistryObject<BlockItem> RED_WELL         = fromColoredWell(ModBlocks.RED_WELL);
+	public static final RegistryObject<BlockItem> BLACK_WELL       = fromColoredWell(ModBlocks.BLACK_WELL);
 
 	public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -39,6 +39,11 @@ public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Forge
 	
 	private static RegistryObject<BlockItem> fromBlock(RegistryObject<Block> block) {
 		return ITEMS.register(block.getId().getPath(), () -> new BlockItem(block.get(), 
+				new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
+	}
+	
+	private static RegistryObject<BlockItem> fromColoredWell(RegistryObject<Block> block) {
+		return ITEMS.register(block.getId().getPath(), () -> new ColoredWellBlockItem(block.get(), 
 				new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
 	}
 	
