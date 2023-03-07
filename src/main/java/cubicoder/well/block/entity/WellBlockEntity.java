@@ -164,10 +164,10 @@ public class WellBlockEntity extends TileFluidHandler {
 			});
 		}
 		
+		// TODO stop fill from every source except the tick?
 		@Override
 		public int fill(FluidStack resource, FluidAction action) {
-			// TODO stop fill from every source except the tick?
-			int fill = super.fill(resource, action);
+			int fill = well.getFluidToFill().getFluid() == resource.getFluid() ? super.fill(resource, action) : 0;
 			if (action.execute() && fill > 0) {
 				BlockState state = well.getBlockState();
 				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, Block.UPDATE_ALL);
