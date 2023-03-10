@@ -5,6 +5,7 @@ import cubicoder.well.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -38,6 +39,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
@@ -222,6 +224,25 @@ public class WellBlock extends BaseEntityBlock {
 		}
 		
 		return InteractionResult.PASS;
+	}
+	
+	@Override
+	public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
+			BlockEntity be = level.getBlockEntity(pos);
+			if (be instanceof WellBlockEntity) {
+				FluidStack fluid = ((WellBlockEntity) be).getTank().getFluid();
+				if (fluid != null && !fluid.isEmpty()) {
+					int baseFluidLight = fluid.getFluid().getAttributes().getLuminosity();
+					if (baseFluidLight > 0) {
+						// TODO config
+						return Mth.clamp((int) (baseFluidLight * fluid.getAmount() / /*ConfigHandler.tankCapacity*/100000 + 0.5), 1, 15);
+					}
+				}
+			}
+		}
+		
+		return 0;
 	}
 	
 	@Override

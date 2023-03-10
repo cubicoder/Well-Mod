@@ -25,6 +25,7 @@ public class WellBlockEntity extends TileFluidHandler {
 	public int fillTick = 0;
 	public int nearbyWells = 1;
 	public int delayUntilNextBucket = 0; // when filling an item from the well, delay before another can be filled
+	public boolean initialized;
 	
 	public WellBlockEntity(BlockPos pos, BlockState state) {
 		super(ModBlocks.WELL_BE.get(), pos, state);
@@ -57,20 +58,25 @@ public class WellBlockEntity extends TileFluidHandler {
 
 	@Override
 	public void onLoad() {
-		if (!level.isClientSide) {
-			initFillTick();
-			countNearbyWells(be -> {
-				be.nearbyWells++;
-				this.nearbyWells++;
-			});
+		if (!initialized) {
+			initialized = true;
+			if (!level.isClientSide) {
+				initFillTick();
+				countNearbyWells(be -> {
+					be.nearbyWells++;
+					this.nearbyWells++;
+				});
+			}
 		}
 		
-		//if (((FluidTankSynced) tank).updateLight(tank.getFluid())) level.setBlocksDirty(getBlockPos(), getBlockState(), getBlockState());
+		if (((WellFluidTank) tank).updateLight(tank.getFluid())) {
+			level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
+		}
 	}
 	
 	// TODO config
 	protected FluidStack getFluidToFill() {
-		return new FluidStack(Fluids.WATER, 1000);
+		return new FluidStack(Fluids.LAVA, 1000);
 		//return ConfigHandler.getFillFluid(getBiome(), level, isUpsideDown(), nearbyWells);
 	}
 	
@@ -81,8 +87,7 @@ public class WellBlockEntity extends TileFluidHandler {
 	
 	public void countNearbyWells(Consumer<WellBlockEntity> updateScript) {
 		level.getChunkAt(getBlockPos()).getBlockEntitiesPos().forEach(otherPos -> {
-			// idk if I like this biome check - it should just be per chunk, straight up
-			if(!otherPos.equals(getBlockPos())/* && level.getBiome(otherPos).value() == getBiome()*/) {
+			if(!otherPos.equals(getBlockPos())) {
 				BlockEntity be = level.getBlockEntity(otherPos);
 				if (be instanceof WellBlockEntity && ((WellBlockEntity) be).isUpsideDown() == isUpsideDown()) {
 					updateScript.accept((WellBlockEntity) be);
@@ -100,6 +105,7 @@ public class WellBlockEntity extends TileFluidHandler {
 		super.load(tag);
 		fillTick = tag.getInt("FillTick");
 		nearbyWells = Math.max(1, tag.getInt("NearbyWells"));
+		initialized = tag.getBoolean("Initialized");
 	}
 	
 	@Override
@@ -107,6 +113,7 @@ public class WellBlockEntity extends TileFluidHandler {
 		super.saveAdditional(tag);
 		tag.putInt("FillTick", fillTick);
 		tag.putInt("NearbyWells", nearbyWells);
+		tag.putBoolean("Initialized", initialized);
 	}
 	
 	@Override
@@ -130,8 +137,8 @@ public class WellBlockEntity extends TileFluidHandler {
 
 		// update renderer and light level if needed
 		if (wasEmpty || wasFull || newFluid != null && newFluid.getAmount() != oldFluid.getAmount()) {
-			//if (newFluid != null) ((FluidTankSynced) tank.updateLight(newFluid);
-			//else ((FluidTankSynced) tank).updateLight(oldFluid);
+			if (newFluid != null) ((WellFluidTank) tank).updateLight(newFluid);
+			else ((WellFluidTank) tank).updateLight(oldFluid);
 			level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
 		}
 	}
@@ -140,7 +147,6 @@ public class WellBlockEntity extends TileFluidHandler {
 		return tank;
 	}
 	
-	// TODO light stuff
 	public static class WellFluidTank extends FluidTank {
 
 		private WellBlockEntity well;
@@ -171,7 +177,7 @@ public class WellBlockEntity extends TileFluidHandler {
 			if (action.execute() && fill > 0) {
 				BlockState state = well.getBlockState();
 				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, Block.UPDATE_ALL);
-				//updateLight(resource);
+				updateLight(resource);
 			}
 			return fill;
 		}
@@ -182,9 +188,19 @@ public class WellBlockEntity extends TileFluidHandler {
 			if (resource != null && action.execute()) {
 				BlockState state = well.getBlockState();
 				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, Block.UPDATE_ALL);
-				//updateLight(resource);
+				updateLight(resource);
 			}
 			return resource;
+		}
+		
+		protected boolean updateLight(FluidStack resource) {
+			if (resource != null) {
+				if (resource.getFluid().getAttributes().getLuminosity() > 0) {
+					well.getLevel().getLightEngine().checkBlock(well.getBlockPos());
+					return true;
+				}
+			}
+			return false;
 		}
 		
 	}

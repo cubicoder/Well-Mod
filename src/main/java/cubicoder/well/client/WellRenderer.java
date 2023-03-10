@@ -32,10 +32,6 @@ public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 					.apply(fluid.getFluid().getAttributes().getStillTexture(fluid));
 
 			int color = fluid.getFluid().getAttributes().getColor(well.getLevel(), well.getBlockPos());
-			//float r = ((color >> 16) & 0xFF) / 255f;
-			//float g = ((color >> 8) & 0xFF) / 255f;
-			//float b = ((color) & 0xFF) / 255f;
-			//float a = ((color >> 24) & 0xFF) / 255f;
 
 			float corner = 3F / 16F;
 			float height = getFluidRenderHeight(amount, capacity, upsideDown);
