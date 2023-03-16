@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
+import cubicoder.well.config.WellConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -14,7 +15,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import net.minecraftforge.fluids.capability.TileFluidHandler;
@@ -29,7 +29,7 @@ public class WellBlockEntity extends TileFluidHandler {
 	
 	public WellBlockEntity(BlockPos pos, BlockState state) {
 		super(ModBlocks.WELL_BE.get(), pos, state);
-		tank = new WellFluidTank(this, 100000); // TODO config
+		tank = new WellFluidTank(this, WellConfig.tankCapacity.get());
 	}
 	
 	public static void serverTick(Level level, BlockPos pos, BlockState state, WellBlockEntity be) {
@@ -43,7 +43,7 @@ public class WellBlockEntity extends TileFluidHandler {
 			be.setChanged();
 		}
 		
-		if (be.fillTick <= 0 /*&& ConfigHandler.canGenerateFluid(nearbyWells)*/) { // TODO config
+		if (be.fillTick <= 0 && WellConfig.canGenerateFluid(be.nearbyWells)) {
 			FluidStack fluidToFill = be.getFluidToFill();
 			int result = 0;
 			if (fluidToFill != null) {
@@ -74,15 +74,12 @@ public class WellBlockEntity extends TileFluidHandler {
 		}
 	}
 	
-	// TODO config
 	protected FluidStack getFluidToFill() {
-		return new FluidStack(Fluids.LAVA, 1000);
-		//return ConfigHandler.getFillFluid(getBiome(), level, isUpsideDown(), nearbyWells);
+		return WellConfig.getFillFluid(level.getBiome(getBlockPos()).value(), level, getBlockPos(), isUpsideDown(), nearbyWells);
 	}
 	
 	protected void initFillTick() {
-		//fillTick = ConfigHandler.getFillDelay(getBiome(), level.random, isUpsideDown()); // TODO config
-		fillTick = 40; // two seconds
+		fillTick = WellConfig.getFillDelay(level.getBiome(getBlockPos()).value(), level, level.random, isUpsideDown());
 	}
 	
 	public void countNearbyWells(Consumer<WellBlockEntity> updateScript) {

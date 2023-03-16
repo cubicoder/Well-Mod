@@ -1,9 +1,12 @@
 package cubicoder.well.block;
 
 import cubicoder.well.block.entity.WellBlockEntity;
+import cubicoder.well.config.WellConfig;
 import cubicoder.well.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -138,15 +141,15 @@ public class WellBlock extends BaseEntityBlock {
 		level.setBlockAndUpdate(pos.above(state.getValue(UPSIDE_DOWN) ? -1 : 1), state.setValue(HALF, DoubleBlockHalf.UPPER));
 		
 		// warn placer if only one well can function in the area
-		/*if (ConfigHandler.onlyOnePerChunk && placer instanceof ServerPlayer) {
+		if (WellConfig.onlyOnePerChunk.get() && placer instanceof ServerPlayer) {
 			BlockEntity be = level.getBlockEntity(pos);
 			if (be instanceof WellBlockEntity && ((WellBlockEntity) be).nearbyWells > 1) {
 				// TODO stop block from being placed if there's only one well per area? instead of just warning
 				String message = state.getValue(UPSIDE_DOWN) ? "warn.well.onePerChunkFlipped" : "warn.well.onePerChunk";
-				placer.displayClientMessage(new TranslatableComponent(message), true);
+				((ServerPlayer) placer).displayClientMessage(new TranslatableComponent(message), true);
 			}
 				
-		}*/
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -209,13 +212,14 @@ public class WellBlock extends BaseEntityBlock {
 			
 			boolean delayFlag = true;
 			boolean fillingItem = FluidUtil.tryFillContainer(player.getItemInHand(hand), well.getTank(), Integer.MAX_VALUE, player, false).success;
+			
+			// only delay if drawing from the well with a fluid item
 			if (fillingItem) {
-				// only delay if drawing from the well with a fluid item
 				if (well.delayUntilNextBucket > 0) delayFlag = false;
 			}
 			
 			if (delayFlag && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection())) {
-				if (/*ConfigHandler.playSound && */fillingItem) { // TODO config
+				if (WellConfig.playSound.get() && fillingItem) {
 					level.playSound(null, pos.above(), ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.25F, 1);
 					well.delayUntilNextBucket = 32;
 				}
@@ -235,8 +239,7 @@ public class WellBlock extends BaseEntityBlock {
 				if (fluid != null && !fluid.isEmpty()) {
 					int baseFluidLight = fluid.getFluid().getAttributes().getLuminosity();
 					if (baseFluidLight > 0) {
-						// TODO config
-						return Mth.clamp((int) (baseFluidLight * fluid.getAmount() / /*ConfigHandler.tankCapacity*/100000 + 0.5), 1, 15);
+						return Mth.clamp((int) (baseFluidLight * fluid.getAmount() / WellConfig.tankCapacity.get() + 0.5), 1, 15);
 					}
 				}
 			}

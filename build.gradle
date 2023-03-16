@@ -153,6 +153,7 @@ dependencies {
     implementation fg.deobf("curse.maven:thermal-dynamics-227443:4391159")
     implementation fg.deobf("curse.maven:patchouli-306770:3846086")
     implementation fg.deobf("curse.maven:itank-256991:3697465")
+    implementation fg.deobf("curse.maven:gamemenumodoption-353051:4068419")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
