@@ -186,7 +186,7 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [2022] [jbredwards]
+   Copyright [2022] [jbredwards]  
    Modifications Copyright 2023 cubicoder
 
    Licensed under the Apache License, Version 2.0 (the "License");
