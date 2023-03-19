@@ -53,7 +53,7 @@ public class WellConfig {
 				.worldRestart()
 				.defineInRange("tankCapacity", 100000, 0, Integer.MAX_VALUE);
 		onlyOnePerChunk = builder
-				.comment("When set to true, all wells in the area will stop working while there's more than 1.")
+				.comment("When set to true, all wells in the chunk will stop working while there's more than 1.")
 				.translation("config.well.onlyOnePerChunk")
 				.define("onlyOnePerChunk", false);
 		dataList = builder

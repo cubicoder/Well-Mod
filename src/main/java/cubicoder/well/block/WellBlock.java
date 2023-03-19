@@ -1,16 +1,21 @@
 package cubicoder.well.block;
 
+import java.util.Random;
+
 import cubicoder.well.block.entity.WellBlockEntity;
 import cubicoder.well.config.WellConfig;
 import cubicoder.well.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +29,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -33,6 +39,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.material.PushReaction;
@@ -144,7 +152,6 @@ public class WellBlock extends BaseEntityBlock {
 		if (WellConfig.onlyOnePerChunk.get() && placer instanceof ServerPlayer) {
 			BlockEntity be = level.getBlockEntity(pos);
 			if (be instanceof WellBlockEntity && ((WellBlockEntity) be).nearbyWells > 1) {
-				// TODO stop block from being placed if there's only one well per area? instead of just warning
 				String message = state.getValue(UPSIDE_DOWN) ? "warn.well.onePerChunkFlipped" : "warn.well.onePerChunk";
 				((ServerPlayer) placer).displayClientMessage(new TranslatableComponent(message), true);
 			}
@@ -249,6 +256,84 @@ public class WellBlock extends BaseEntityBlock {
 	}
 	
 	@Override
+	public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
+			BlockEntity be = level.getBlockEntity(pos);
+			if (be instanceof WellBlockEntity) {
+				WellBlockEntity well = (WellBlockEntity) be;
+				FluidStack fluid = well.getTank().getFluid();
+				
+				if (fluid != null && fluid.getFluid().getAttributes().canBePlacedInWorld(level, pos, fluid)) {
+					int amount = well.getTank().getFluidAmount();
+					int capacity = well.getTank().getCapacity();
+					boolean upsideDown = state.getValue(UPSIDE_DOWN);
+					FluidState fluidState = fluid.getFluid().getAttributes().getStateForPlacement(level, pos, fluid);
+					Material fluidMaterial = fluid.getFluid().getAttributes().getBlock(level, pos, fluidState).getMaterial();
+
+					if (entity.getY() < (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
+						// hardcoded behavior for lava and water based on cauldron
+						if (fluidMaterial == Material.LAVA) {
+							entity.lavaHurt();
+						}
+
+						if (fluidMaterial == Material.WATER) {
+							if (!level.isClientSide && entity.isOnFire()) {
+								entity.clearFire();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
+			BlockEntity be = level.getBlockEntity(pos);
+			if (be instanceof WellBlockEntity) {
+				WellBlockEntity well = (WellBlockEntity) be;
+				FluidStack fluid = well.getTank().getFluid();
+				
+				if (fluid != null) {
+					int amount = well.getTank().getFluidAmount();
+					int capacity = well.getTank().getCapacity();
+					boolean upsideDown = state.getValue(UPSIDE_DOWN);
+					float height = getFluidRenderHeight(amount, capacity, upsideDown);
+					FluidState fluidState = fluid.getFluid().defaultFluidState();
+					fluidState.animateTick(level, pos, random);
+
+					// get around lava particle check
+					if (fluid.getFluid() == Fluids.LAVA) {
+						if (random.nextInt(100) == 0) {
+							double x = (double) pos.getX() + random.nextDouble();
+							double y = (double) pos.getY() + height;
+							double z = (double) pos.getZ() + random.nextDouble();
+							level.addParticle(ParticleTypes.LAVA, x, y, z, 0.0D, 0.0D, 0.0D);
+							level.playLocalSound(x, y, z, SoundEvents.LAVA_POP, SoundSource.BLOCKS,
+									0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+						}
+
+						if (random.nextInt(200) == 0) {
+							double x = (double) pos.getX() + 0.5;
+							double y = (double) pos.getY() + height / 2;
+							double z = (double) pos.getZ() + 0.5;
+							level.playLocalSound(x, y, z, SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS,
+									0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Override
+	public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, Entity entity) {
+		// improve the roof sound if possible (some mods change the sound type of bricks to be better)
+		return state.getValue(HALF) == DoubleBlockHalf.UPPER ? this.soundType : Blocks.BRICKS.getSoundType(state, level, pos, entity);
+	}
+		
+	@Override
 	public PushReaction getPistonPushReaction(BlockState state) {
 		return PushReaction.BLOCK;
 	}
@@ -339,6 +424,11 @@ public class WellBlock extends BaseEntityBlock {
 		});
 		
 		return buffer[1];
+	}
+	
+	public static float getFluidRenderHeight(int amount, int capacity, boolean upsideDown) {
+		float height = amount * 14F / (16 * capacity) + (2F / 16);
+		return upsideDown ? 1 - height : height;
 	}
 
 }

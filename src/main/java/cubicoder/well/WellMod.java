@@ -28,7 +28,7 @@ public final class WellMod {
 		modbus.addListener(WellConfig::configChanged);
 	}
 	
-	private void onClientSetup(final FMLClientSetupEvent event) {
+	private void onClientSetup(FMLClientSetupEvent event) {
 		event.enqueueWork(() -> BlockEntityRenderers.register(ModBlocks.WELL_BE.get(), WellRenderer::new));
 	}
 	
