@@ -263,23 +263,29 @@ public class WellBlock extends BaseEntityBlock {
 				WellBlockEntity well = (WellBlockEntity) be;
 				FluidStack fluid = well.getTank().getFluid();
 				
-				if (fluid != null && fluid.getFluid().getAttributes().canBePlacedInWorld(level, pos, fluid)) {
+				if (fluid != null) {
 					int amount = well.getTank().getFluidAmount();
 					int capacity = well.getTank().getCapacity();
 					boolean upsideDown = state.getValue(UPSIDE_DOWN);
 					FluidState fluidState = fluid.getFluid().getAttributes().getStateForPlacement(level, pos, fluid);
 					Material fluidMaterial = fluid.getFluid().getAttributes().getBlock(level, pos, fluidState).getMaterial();
 
-					if (entity.getY() < (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
-						// hardcoded behavior for lava and water based on cauldron
-						if (fluidMaterial == Material.LAVA) {
-							entity.lavaHurt();
-						}
-
-						if (fluidMaterial == Material.WATER) {
-							if (!level.isClientSide && entity.isOnFire()) {
-								entity.clearFire();
+					if (!upsideDown) {
+						if (entity.getY() < (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
+							// hardcoded behavior for lava and water based on cauldron
+							if (fluidMaterial == Material.LAVA) {
+								entity.lavaHurt();
 							}
+							
+							if (fluidMaterial == Material.WATER) {
+								if (!level.isClientSide && entity.isOnFire()) {
+									entity.clearFire();
+								}
+							}
+						}
+					} else {
+						if (entity.getY() > (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
+							// no behavior for upside down fluids (yet?)
 						}
 					}
 				}

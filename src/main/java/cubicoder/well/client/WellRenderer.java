@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.Direction;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -43,23 +42,21 @@ public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 			float minV = sprite.getV(3);
 			float maxV = sprite.getV(13);
 			
-			poseStack.pushPose();
-			if (upsideDown) {
-				poseStack.translate(0.5D, 0, 0.5D);
-				poseStack.mulPose(Direction.DOWN.getRotation());
-				poseStack.translate(-0.5D, 0, -0.5D);
-			}
-			
 			VertexConsumer builder = bufferSource.getBuffer(RenderType.translucent());
 			Matrix4f matrix = poseStack.last().pose();
-
-			float yNormal = upsideDown ? -1 : 1;
-			builder.vertex(matrix, corner, height, corner).color(color).uv(minU, minV).uv2(packedLight).normal(0, yNormal, 0).endVertex();;
-			builder.vertex(matrix, corner, height, 1 - corner).color(color).uv(minU, maxV).uv2(packedLight).normal(0, yNormal, 0).endVertex();;
-			builder.vertex(matrix, 1 - corner, height, 1 - corner).color(color).uv(maxU, maxV).uv2(packedLight).normal(0, yNormal, 0).endVertex();;
-			builder.vertex(matrix, 1 - corner, height, corner).color(color).uv(maxU, minV).uv2(packedLight).normal(0, yNormal, 0).endVertex();;
 			
-			poseStack.popPose();
+			if (upsideDown) {
+				builder.vertex(matrix, 1 - corner, height, corner).color(color).uv(maxU, minV).uv2(packedLight).normal(0, -1, 0).endVertex();
+				builder.vertex(matrix, 1 - corner, height, 1 - corner).color(color).uv(maxU, maxV).uv2(packedLight).normal(0, -1, 0).endVertex();
+				builder.vertex(matrix, corner, height, 1 - corner).color(color).uv(minU, maxV).uv2(packedLight).normal(0, -1, 0).endVertex();
+				builder.vertex(matrix, corner, height, corner).color(color).uv(minU, minV).uv2(packedLight).normal(0, -1, 0).endVertex();
+			} else {
+				builder.vertex(matrix, corner, height, corner).color(color).uv(minU, minV).uv2(packedLight).normal(0, 1, 0).endVertex();
+				builder.vertex(matrix, corner, height, 1 - corner).color(color).uv(minU, maxV).uv2(packedLight).normal(0, 1, 0).endVertex();
+				builder.vertex(matrix, 1 - corner, height, 1 - corner).color(color).uv(maxU, maxV).uv2(packedLight).normal(0, 1, 0).endVertex();
+				builder.vertex(matrix, 1 - corner, height, corner).color(color).uv(maxU, minV).uv2(packedLight).normal(0, 1, 0).endVertex();
+			}
+			
 		}
 	}
 
