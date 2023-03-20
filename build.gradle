@@ -19,7 +19,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
 
-version = "${mod_version}"
+version = "${mc_version}-${mod_version}"
 group = 'cubicoder'
 archivesBaseName = "${mod_id}"
 
