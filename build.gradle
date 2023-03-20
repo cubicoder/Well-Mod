@@ -119,6 +119,11 @@ repositories {
     //     dir 'libs'
     // }
     
+    // JEI
+    maven {
+        url "https://maven.blamejared.com/"
+    }
+    // other CurseForge mods
     maven {
         url "https://cursemaven.com"
         content {
@@ -130,8 +135,9 @@ repositories {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.1'
 
-    compileOnly fg.deobf("curse.maven:jei-238222:${jei_fileid}:api")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:${jei_fileid}")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 
     implementation fg.deobf("curse.maven:the-one-probe-245211:${top_fileid}")
     
