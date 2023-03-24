@@ -10,20 +10,17 @@ buildscript {
         classpath 'org.parchmentmc:librarian:1.+'
     }
 }
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-plugins {
-    id 'eclipse'
-    id 'maven-publish'
-}
 apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
-
 
 version = "${mc_version}-${mod_version}"
 group = 'cubicoder'
 archivesBaseName = "${mod_id}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
@@ -37,7 +34,6 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', "${mod_id}"
             
             // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
             property 'mixin.env.remapRefMap', 'true'
@@ -55,28 +51,6 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', "${mod_id}"
-            
-            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            mods {
-                well {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', "${mod_id}"
             
             // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
             property 'mixin.env.remapRefMap', 'true'
@@ -133,11 +107,10 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.2.1'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
 
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
-    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
 
     implementation fg.deobf("curse.maven:the-one-probe-245211:${top_fileid}")
     
@@ -146,21 +119,15 @@ dependencies {
     implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
     implementation fg.deobf("curse.maven:configured-457570:${configured_fileid}")
     
-    implementation fg.deobf("curse.maven:pipez-443900:3819249")
-    //implementation fg.deobf("curse.maven:portable-tanks-503920:4024684")
-    //implementation fg.deobf("curse.maven:supermartijn642s-core-lib-454372:3863129")
-    //implementation fg.deobf("curse.maven:supermartijn642s-config-lib-438332:3862966")
-    implementation fg.deobf("curse.maven:largefluidtank-291006:4074087")
-    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4059979")
-    implementation fg.deobf("curse.maven:cofh-core-69162:4385215")
-    implementation fg.deobf("curse.maven:thermal-foundation-222880:4382339")
-    implementation fg.deobf("curse.maven:thermal-expansion-69163:4382343")
-    implementation fg.deobf("curse.maven:thermal-innovation-291737:4382344")
-    implementation fg.deobf("curse.maven:thermal-dynamics-227443:4391159")
-    implementation fg.deobf("curse.maven:patchouli-306770:3846086")
-    implementation fg.deobf("curse.maven:itank-256991:3697465")
-    implementation fg.deobf("curse.maven:gamemenumodoption-353051:4068419")
-    implementation fg.deobf("curse.maven:reauth-237701:4408008")
+    implementation fg.deobf("curse.maven:pipez-443900:3760254")
+    implementation fg.deobf("curse.maven:cofh-core-69162:4022663")
+    implementation fg.deobf("curse.maven:thermal-foundation-222880:4022666")
+    implementation fg.deobf("curse.maven:thermal-expansion-69163:4063134")
+    implementation fg.deobf("curse.maven:thermal-innovation-291737:3788896")
+    implementation fg.deobf("curse.maven:patchouli-306770:3847029")
+    implementation fg.deobf("curse.maven:itank-256991:3545011")
+    implementation fg.deobf("curse.maven:gamemenumodoption-353051:3600710")
+    implementation fg.deobf("curse.maven:reauth-237701:4408006")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
