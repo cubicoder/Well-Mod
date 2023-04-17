@@ -1,23 +1,9 @@
-buildscript {
-    repositories {
-        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
-    }
-}
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 plugins {
     id 'eclipse'
     id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-
 
 version = "${mc_version}-${mod_version}"
 group = 'cubicoder'
@@ -38,10 +24,6 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', "${mod_id}"
-            
-            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 well {
@@ -56,10 +38,6 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', "${mod_id}"
-            
-            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 well {
@@ -76,11 +54,7 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', "${mod_id}"
-            
-            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'forge.enabledGameTestNamespaces', 'examplemod'
 
             mods {
                 well {
@@ -94,10 +68,6 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            
-            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             args '--mod', "${mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
@@ -114,7 +84,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
+    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
     // flatDir {
     //     dir 'libs'
     // }
@@ -133,7 +103,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.2.1'
+    minecraft 'net.minecraftforge:forge:1.19.4-45.0.43'
 
     compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
@@ -146,23 +116,23 @@ dependencies {
     implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
     implementation fg.deobf("curse.maven:configured-457570:${configured_fileid}")
     
-    implementation fg.deobf("curse.maven:pipez-443900:3819249")
+    implementation fg.deobf("curse.maven:pipez-443900:4438557")
     //implementation fg.deobf("curse.maven:portable-tanks-503920:4024684")
     //implementation fg.deobf("curse.maven:supermartijn642s-core-lib-454372:3863129")
     //implementation fg.deobf("curse.maven:supermartijn642s-config-lib-438332:3862966")
-    implementation fg.deobf("curse.maven:largefluidtank-291006:4074087")
-    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4059979")
-    implementation fg.deobf("curse.maven:cofh-core-69162:4385215")
-    implementation fg.deobf("curse.maven:thermal-foundation-222880:4382339")
-    implementation fg.deobf("curse.maven:thermal-expansion-69163:4382343")
-    implementation fg.deobf("curse.maven:thermal-innovation-291737:4382344")
-    implementation fg.deobf("curse.maven:thermal-dynamics-227443:4391159")
-    implementation fg.deobf("curse.maven:patchouli-306770:3846086")
-    implementation fg.deobf("curse.maven:itank-256991:3697465")
-    implementation fg.deobf("curse.maven:gamemenumodoption-353051:4068419")
-    implementation fg.deobf("curse.maven:reauth-237701:4408008")
-    implementation fg.deobf("curse.maven:biomes-o-plenty-220318:3827434")
-    implementation fg.deobf("curse.maven:terrablender-563928:3957976")
+    //implementation fg.deobf("curse.maven:largefluidtank-291006:4074087")
+    //implementation fg.deobf("curse.maven:scalable-cats-force-320926:4059979")
+    implementation fg.deobf("curse.maven:cofh-core-69162:4385216") // 1.19.2
+    implementation fg.deobf("curse.maven:thermal-foundation-222880:4382373") // 1.19.2
+    implementation fg.deobf("curse.maven:thermal-expansion-69163:4382371") // 1.19.2
+    implementation fg.deobf("curse.maven:thermal-innovation-291737:4382374") // 1.19.2
+    implementation fg.deobf("curse.maven:thermal-dynamics-227443:4391160") // 1.19.2
+    //implementation fg.deobf("curse.maven:patchouli-306770:3846086")
+    implementation fg.deobf("curse.maven:itank-256991:3921315") // 1.19.2
+    implementation fg.deobf("curse.maven:gamemenumodoption-353051:4440228")
+    implementation fg.deobf("curse.maven:reauth-237701:4408013") // 1.19.3
+    implementation fg.deobf("curse.maven:biomes-o-plenty-220318:4472740")
+    implementation fg.deobf("curse.maven:terrablender-563928:4458636")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
