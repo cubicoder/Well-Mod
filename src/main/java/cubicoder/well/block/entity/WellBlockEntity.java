@@ -35,7 +35,6 @@ public class WellBlockEntity extends TileFluidHandler {
 	public static void serverTick(Level level, BlockPos pos, BlockState state, WellBlockEntity be) {
 		if (be.delayUntilNextBucket > 0) {
 			be.delayUntilNextBucket--;
-			be.setChanged();
 		}
 		
 		if (be.fillTick > 0) {

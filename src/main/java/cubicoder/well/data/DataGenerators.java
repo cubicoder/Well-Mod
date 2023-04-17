@@ -28,7 +28,6 @@ public class DataGenerators {
 		if (event.includeClient()) {
 			gen.addProvider(new ModBlockStateProvider(gen, event.getExistingFileHelper()));
 			//gen.addProvider(new ModItemModelProvider(gen, event.getExistingFileHelper()));
-			//gen.addProvider(new ModLanguageProvider(gen, "en_us"));
 		}
 	}
 	

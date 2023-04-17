@@ -21,12 +21,10 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 public class ModBlockStateProvider extends BlockStateProvider {
 
 	private ExistingModelFile wellBase;
-	//private ExistingModelFile wellRoof;
 	
 	public ModBlockStateProvider(DataGenerator gen, ExistingFileHelper exFileHelper) {
 		super(gen, WellMod.MODID, exFileHelper);
 		wellBase = new ExistingModelFile(modLoc(BlockModelProvider.BLOCK_FOLDER + "/well_base"), exFileHelper);
-		//wellRoof = new ExistingModelFile(modLoc(BlockModelProvider.BLOCK_FOLDER + "/well_roof"), exFileHelper);
 	}
 
 	@Override
@@ -36,41 +34,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
 			wellItemModel(block.get());
 			wellBlockState(block.get());
 		});
-		
-		/*this.getVariantBuilder(ModBlocks.WELL.get())
-				.forAllStates(state -> ConfiguredModel.builder()
-						.modelFile(state.getValue(WellBlock.HALF).equals(DoubleBlockHalf.LOWER) ? wellBase : wellRoof)
-						.rotationY(state.getValue(WellBlock.AXIS).equals(Axis.X) ? 0 : 90)
-						.rotationX(state.getValue(WellBlock.UPSIDE_DOWN) ? 180 : 0).build());
-		
-		//wellBlock(ModBlocks.WELL.get());
-		
-		// item models
-		wellItemModel(ModBlocks.WELL.get());
-		wellItemModel(ModBlocks.WHITE_WELL.get());
-		wellItemModel(ModBlocks.ORANGE_WELL.get());
-		wellItemModel(ModBlocks.MAGENTA_WELL.get());
-		wellItemModel(ModBlocks.LIGHT_BLUE_WELL.get());
-		wellItemModel(ModBlocks.YELLOW_WELL.get());
-		wellItemModel(ModBlocks.LIME_WELL.get());
-		wellItemModel(ModBlocks.PINK_WELL.get());
-		wellItemModel(ModBlocks.GRAY_WELL.get());
-		wellItemModel(ModBlocks.LIGHT_GRAY_WELL.get());
-		wellItemModel(ModBlocks.CYAN_WELL.get());
-		wellItemModel(ModBlocks.PURPLE_WELL.get());
-		wellItemModel(ModBlocks.BLUE_WELL.get());
-		wellItemModel(ModBlocks.BROWN_WELL.get());
-		wellItemModel(ModBlocks.GREEN_WELL.get());
-		wellItemModel(ModBlocks.RED_WELL.get());
-		wellItemModel(ModBlocks.BLACK_WELL.get());*/
 	}
-
-	/*private BlockModelBuilder wellBlockBase(Block block) {
-		String path = block.getRegistryName().getPath();
-		String color = path.length() > 4 ? path.substring(0, path.length() - 5) : "brick";
-		return this.models().withExistingParent(path, modLoc(BlockModelProvider.BLOCK_FOLDER + "/well_base"))
-				.texture("roof", modLoc(BlockModelProvider.BLOCK_FOLDER + "/" + color + "_roof"));
-	}*/
 	
 	private BlockModelBuilder wellBlockRoof(Block block) {
 		String path = block.getRegistryName().getPath();

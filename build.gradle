@@ -161,6 +161,8 @@ dependencies {
     implementation fg.deobf("curse.maven:itank-256991:3697465")
     implementation fg.deobf("curse.maven:gamemenumodoption-353051:4068419")
     implementation fg.deobf("curse.maven:reauth-237701:4408008")
+    implementation fg.deobf("curse.maven:biomes-o-plenty-220318:3827434")
+    implementation fg.deobf("curse.maven:terrablender-563928:3957976")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
