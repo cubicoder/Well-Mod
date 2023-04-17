@@ -3,16 +3,16 @@ package cubicoder.well.data.common;
 import java.util.function.Consumer;
 
 import cubicoder.well.block.ModBlocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.RecipeProvider;
+import net.minecraft.data.ShapedRecipeBuilder;
+import net.minecraft.data.ShapelessRecipeBuilder;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import net.minecraft.tags.ITag;
+import net.minecraft.util.IItemProvider;
 import net.minecraftforge.common.Tags;
 
 public class ModRecipeProvider extends RecipeProvider {
@@ -20,9 +20,9 @@ public class ModRecipeProvider extends RecipeProvider {
 	public ModRecipeProvider(DataGenerator generator) {
 		super(generator);
 	}
-
+	
 	@Override
-	protected void buildCraftingRecipes(Consumer<FinishedRecipe> finishedRecipeConsumer) {
+	protected void buildShapelessRecipes(Consumer<IFinishedRecipe> finishedRecipeConsumer) {
 		ShapedRecipeBuilder.shaped(ModBlocks.WELL.get())
 				.pattern("RRR")
 				.pattern("/L/")
@@ -53,7 +53,7 @@ public class ModRecipeProvider extends RecipeProvider {
 		dyedWell(finishedRecipeConsumer, ModBlocks.BLACK_WELL.get(), Tags.Items.DYES_BLACK);
 	}
 	
-	private void dyedWell(Consumer<FinishedRecipe> finishedRecipeConsumer, ItemLike dyedWell, TagKey<Item> dye) {
+	private void dyedWell(Consumer<IFinishedRecipe> finishedRecipeConsumer, IItemProvider dyedWell, ITag<Item> dye) {
 		ShapelessRecipeBuilder.shapeless(dyedWell).requires(dye).requires(ModBlocks.WELL.get()).group("wells")
 				.unlockedBy("has_well", has(ModBlocks.WELL.get())).save(finishedRecipeConsumer);
 	}

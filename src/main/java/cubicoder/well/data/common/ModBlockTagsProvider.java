@@ -1,13 +1,12 @@
 package cubicoder.well.data.common;
 
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import cubicoder.well.WellMod;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.tags.ModBlockTags;
+import net.minecraft.data.BlockTagsProvider;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
-import net.minecraft.tags.BlockTags;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class ModBlockTagsProvider extends BlockTagsProvider {
@@ -36,8 +35,6 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 				ModBlocks.GREEN_WELL.get(),
 				ModBlocks.RED_WELL.get(),
 				ModBlocks.BLACK_WELL.get());
-		
-		tag(BlockTags.MINEABLE_WITH_PICKAXE).addTag(ModBlockTags.WELLS);
 	}
 	
 	@Override

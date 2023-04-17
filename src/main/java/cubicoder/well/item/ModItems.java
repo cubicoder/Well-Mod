@@ -2,14 +2,14 @@ package cubicoder.well.item;
 
 import cubicoder.well.WellMod;
 import cubicoder.well.block.ModBlocks;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
 public class ModItems {
 
@@ -39,12 +39,12 @@ public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Forge
 	
 	private static RegistryObject<BlockItem> fromBlock(RegistryObject<Block> block) {
 		return ITEMS.register(block.getId().getPath(), () -> new BlockItem(block.get(), 
-				new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
+				new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)));
 	}
 	
 	private static RegistryObject<BlockItem> fromColoredWell(RegistryObject<Block> block) {
 		return ITEMS.register(block.getId().getPath(), () -> new ColoredWellBlockItem(block.get(), 
-				new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
+				new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)));
 	}
 	
 }

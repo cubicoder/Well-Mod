@@ -9,7 +9,7 @@ import cubicoder.well.data.common.ModRecipeProvider;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 
 @EventBusSubscriber(modid = WellMod.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class DataGenerators {
@@ -28,7 +28,6 @@ public class DataGenerators {
 		if (event.includeClient()) {
 			gen.addProvider(new ModBlockStateProvider(gen, event.getExistingFileHelper()));
 			//gen.addProvider(new ModItemModelProvider(gen, event.getExistingFileHelper()));
-			//gen.addProvider(new ModLanguageProvider(gen, "en_us"));
 		}
 	}
 	

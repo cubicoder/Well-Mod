@@ -3,13 +3,12 @@ package cubicoder.well.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.material.Fluids;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -21,10 +20,10 @@ public class WellData {
 	public FluidStack fluid;
 	public int minToFill;
 	public int maxToFill;
-	public List<ResourceLocation> biomes;
-	public List<ResourceLocation> biomeTags;
+	public List<Biome> biomes;
+	public List<BiomeDictionary.Type> biomeTags;
 	
-	public WellData(FluidStack fluid, int minToFill, int maxToFill, List<ResourceLocation> biomes, List<ResourceLocation> biomeTags) {
+	public WellData(FluidStack fluid, int minToFill, int maxToFill, List<Biome> biomes, List<BiomeDictionary.Type> biomeTags) {
 		this.fluid = fluid;
 		this.minToFill = minToFill;
 		this.maxToFill = maxToFill;
@@ -40,16 +39,14 @@ public class WellData {
 		this.biomeTags = new ArrayList<>();
 	}
 	
-	public boolean hasBiome(Biome biome, Level level) {
-		for (ResourceLocation loc : biomes) {
-			if (biome.getRegistryName().equals(loc)) return true;
+	public boolean hasBiome(Biome biome, World level) {
+		for (Biome b : biomes) {
+			if (biome.getRegistryName().equals(b.getRegistryName())) return true;
 		}
 		
-		Registry<Biome> reg = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-		for (ResourceLocation tag : biomeTags) {
-			for (Holder<Biome> b : reg.getOrCreateTag(TagKey.create(Registry.BIOME_REGISTRY, tag))) {
-				if (biome.getRegistryName().equals(b.value().getRegistryName())) return true;
-			}
+		RegistryKey<Biome> biomeKey = RegistryKey.create(Registry.BIOME_REGISTRY, biome.getRegistryName());
+		for (BiomeDictionary.Type c : biomeTags) {
+			if (BiomeDictionary.getBiomes(c).contains(biomeKey)) return true;
 		}
 		
 		return false;

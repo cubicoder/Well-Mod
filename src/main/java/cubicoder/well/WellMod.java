@@ -5,8 +5,8 @@ import cubicoder.well.client.WellRenderer;
 import cubicoder.well.config.WellConfig;
 import cubicoder.well.item.ModItems;
 import cubicoder.well.sound.ModSounds;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -29,7 +29,7 @@ public final class WellMod {
 	}
 	
 	private void onClientSetup(FMLClientSetupEvent event) {
-		event.enqueueWork(() -> BlockEntityRenderers.register(ModBlocks.WELL_BE.get(), WellRenderer::new));
+		event.enqueueWork(() -> ClientRegistry.bindTileEntityRenderer(ModBlocks.WELL_BE.get(), WellRenderer::new));
 	}
 	
 }

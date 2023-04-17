@@ -5,53 +5,49 @@ import java.util.function.Consumer;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import cubicoder.well.config.WellConfig;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.tileentity.ITickableTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.util.Constants.BlockFlags;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import net.minecraftforge.fluids.capability.TileFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 
-public class WellBlockEntity extends TileFluidHandler {
+public class WellBlockEntity extends TileFluidHandler implements ITickableTileEntity {
 
 	public int fillTick = 0;
 	public int nearbyWells = 1;
 	public int delayUntilNextBucket = 0; // when filling an item from the well, delay before another can be filled
 	public boolean initialized;
 	
-	public WellBlockEntity(BlockPos pos, BlockState state) {
-		super(ModBlocks.WELL_BE.get(), pos, state);
+	public WellBlockEntity() {
+		super(ModBlocks.WELL_BE.get());
 		tank = new WellFluidTank(this, WellConfig.tankCapacity.get());
 	}
 	
-	public static void serverTick(Level level, BlockPos pos, BlockState state, WellBlockEntity be) {
-		if (be.delayUntilNextBucket > 0) {
-			be.delayUntilNextBucket--;
-			be.setChanged();
+	public void tick() {
+		if (delayUntilNextBucket > 0) {
+			delayUntilNextBucket--;
 		}
 		
-		if (be.fillTick > 0) {
-			be.fillTick--;
-			be.setChanged();
+		if (fillTick > 0) {
+			fillTick--;
+			setChanged();
 		}
 		
-		if (be.fillTick <= 0 && WellConfig.canGenerateFluid(be.nearbyWells)) {
-			FluidStack fluidToFill = be.getFluidToFill();
+		if (fillTick <= 0 && WellConfig.canGenerateFluid(nearbyWells)) {
+			FluidStack fluidToFill = getFluidToFill();
 			int result = 0;
 			if (fluidToFill != null) {
-				result = be.tank.fill(fluidToFill, FluidAction.EXECUTE);
+				result = tank.fill(fluidToFill, FluidAction.EXECUTE);
 			}
 			if (result > 0) {
-				be.initFillTick();
-				be.setChanged();
+				initFillTick();
+				setChanged();
 			}
 		}
 	}
@@ -70,22 +66,22 @@ public class WellBlockEntity extends TileFluidHandler {
 		}
 		
 		if (((WellFluidTank) tank).updateLight(tank.getFluid())) {
-			level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
+			level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), BlockFlags.DEFAULT);
 		}
 	}
 	
 	protected FluidStack getFluidToFill() {
-		return WellConfig.getFillFluid(level.getBiome(getBlockPos()).value(), level, getBlockPos(), isUpsideDown(), nearbyWells);
+		return WellConfig.getFillFluid(level.getBiome(getBlockPos()), level, getBlockPos(), isUpsideDown(), nearbyWells);
 	}
 	
 	protected void initFillTick() {
-		fillTick = WellConfig.getFillDelay(level.getBiome(getBlockPos()).value(), level, level.random, isUpsideDown());
+		fillTick = WellConfig.getFillDelay(level.getBiome(getBlockPos()), level, level.random, isUpsideDown());
 	}
 	
 	public void countNearbyWells(Consumer<WellBlockEntity> updateScript) {
 		level.getChunkAt(getBlockPos()).getBlockEntitiesPos().forEach(otherPos -> {
 			if(!otherPos.equals(getBlockPos())) {
-				BlockEntity be = level.getBlockEntity(otherPos);
+				TileEntity be = level.getBlockEntity(otherPos);
 				if (be instanceof WellBlockEntity && ((WellBlockEntity) be).isUpsideDown() == isUpsideDown()) {
 					updateScript.accept((WellBlockEntity) be);
 				}
@@ -98,35 +94,36 @@ public class WellBlockEntity extends TileFluidHandler {
 	}
 	
 	@Override
-	public void load(CompoundTag tag) {
-		super.load(tag);
+	public void load(BlockState state, CompoundNBT tag) {
+		super.load(state, tag);
 		fillTick = tag.getInt("FillTick");
 		nearbyWells = Math.max(1, tag.getInt("NearbyWells"));
 		initialized = tag.getBoolean("Initialized");
 	}
 	
 	@Override
-	protected void saveAdditional(CompoundTag tag) {
-		super.saveAdditional(tag);
+	public CompoundNBT save(CompoundNBT tag) {
+		tag = super.save(tag);
 		tag.putInt("FillTick", fillTick);
 		tag.putInt("NearbyWells", nearbyWells);
 		tag.putBoolean("Initialized", initialized);
+		return tag;
 	}
 	
 	@Override
-	public CompoundTag getUpdateTag() {
-		return saveWithoutMetadata();
+	public CompoundNBT getUpdateTag() {
+		return this.save(new CompoundNBT());
 	}
 	
 	@Override
-	public Packet<ClientGamePacketListener> getUpdatePacket() {
-		return ClientboundBlockEntityDataPacket.create(this);
+	public SUpdateTileEntityPacket getUpdatePacket() {
+		return new SUpdateTileEntityPacket(getBlockPos(), -1, this.getUpdateTag());
 	}
 	
 	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
 		FluidStack oldFluid = tank.getFluid();
-		handleUpdateTag(pkt.getTag());
+		handleUpdateTag(getBlockState(), pkt.getTag());
 		FluidStack newFluid = tank.getFluid();
 		
 		boolean wasEmpty = newFluid != null && oldFluid == null;
@@ -136,7 +133,7 @@ public class WellBlockEntity extends TileFluidHandler {
 		if (wasEmpty || wasFull || newFluid != null && newFluid.getAmount() != oldFluid.getAmount()) {
 			if (newFluid != null) ((WellFluidTank) tank).updateLight(newFluid);
 			else ((WellFluidTank) tank).updateLight(oldFluid);
-			level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
+			level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), BlockFlags.DEFAULT);
 		}
 	}
 	
@@ -172,7 +169,7 @@ public class WellBlockEntity extends TileFluidHandler {
 			int fill = well.getFluidToFill().getFluid() == resource.getFluid() ? super.fill(resource, action) : 0;
 			if (action.execute() && fill > 0) {
 				BlockState state = well.getBlockState();
-				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, Block.UPDATE_ALL);
+				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, BlockFlags.DEFAULT);
 				updateLight(resource);
 			}
 			return fill;
@@ -183,7 +180,7 @@ public class WellBlockEntity extends TileFluidHandler {
 			FluidStack resource = super.drain(maxDrain, action);
 			if (resource != null && action.execute()) {
 				BlockState state = well.getBlockState();
-				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, Block.UPDATE_ALL);
+				well.getLevel().sendBlockUpdated(well.getBlockPos(), state, state, BlockFlags.DEFAULT);
 				updateLight(resource);
 			}
 			return resource;

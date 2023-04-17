@@ -2,19 +2,19 @@ package cubicoder.well.block;
 
 import cubicoder.well.WellMod;
 import cubicoder.well.block.entity.WellBlockEntity;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
 public class ModBlocks {
 
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, WellMod.MODID);
 
-	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, WellMod.MODID);
+	public static final DeferredRegister<TileEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, WellMod.MODID);
 	
 	public static final RegistryObject<Block> WELL             = BLOCKS.register("well", () -> new WellBlock(MaterialColor.COLOR_RED));
 	public static final RegistryObject<Block> WHITE_WELL       = BLOCKS.register("white_well", () -> new WellBlock(MaterialColor.SNOW));
@@ -34,8 +34,8 @@ public class ModBlocks {
 	public static final RegistryObject<Block> RED_WELL         = BLOCKS.register("red_well", () -> new WellBlock(MaterialColor.COLOR_RED));
 	public static final RegistryObject<Block> BLACK_WELL       = BLOCKS.register("black_well", () -> new WellBlock(MaterialColor.COLOR_BLACK));
 	
-	public static final RegistryObject<BlockEntityType<WellBlockEntity>> WELL_BE = BLOCK_ENTITIES.register("well",
-			() -> BlockEntityType.Builder.of(WellBlockEntity::new, WELL.get(), WHITE_WELL.get(), ORANGE_WELL.get(),
+	public static final RegistryObject<TileEntityType<WellBlockEntity>> WELL_BE = BLOCK_ENTITIES.register("well",
+			() -> TileEntityType.Builder.of(WellBlockEntity::new, WELL.get(), WHITE_WELL.get(), ORANGE_WELL.get(),
 					MAGENTA_WELL.get(), LIGHT_BLUE_WELL.get(), YELLOW_WELL.get(), LIME_WELL.get(), PINK_WELL.get(),
 					GRAY_WELL.get(), LIGHT_GRAY_WELL.get(), CYAN_WELL.get(), PURPLE_WELL.get(), BLUE_WELL.get(),
 					BROWN_WELL.get(), GREEN_WELL.get(), RED_WELL.get(), BLACK_WELL.get()).build(null));

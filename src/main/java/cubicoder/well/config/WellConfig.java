@@ -6,19 +6,21 @@ import java.util.Random;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class WellConfig {
 
@@ -66,7 +68,7 @@ public class WellConfig {
 	public static boolean validateData(Object entry) {
 		if (!(entry instanceof String)) return false;
 		try {
-			TagParser.parseTag((String) entry);
+			JsonToNBT.parseTag((String) entry);
 			return true;
 		} catch (CommandSyntaxException e) {
 			return false;
@@ -75,31 +77,31 @@ public class WellConfig {
 	
 	public static void initData(String entry) {		
 		try {
-			CompoundTag data = TagParser.parseTag(entry);
+			CompoundNBT data = JsonToNBT.parseTag(entry);
 			
-			if (data.contains("Fluid", Tag.TAG_COMPOUND)) {
+			if (data.contains("Fluid", NBT.TAG_COMPOUND)) {
 				FluidStack fluid = FluidStack.loadFluidStackFromNBT(data.getCompound("Fluid"));
 				if (fluid == null) return;
 				
 				boolean isUpsideDown = fluid.getFluid().getAttributes().isLighterThanAir();
 				
 				// fill delays
-				int minToFill = (data.contains("MinTicks", Tag.TAG_INT)
+				int minToFill = (data.contains("MinTicks", NBT.TAG_INT)
 						? Math.abs(data.getInt("MinTicks"))
 						: (isUpsideDown ? WellData.UPSIDE_DEFAULT : WellData.REGULAR_DEFAULT).minToFill);
-				int maxToFill = (data.contains("MaxTicks", Tag.TAG_INT)
+				int maxToFill = (data.contains("MaxTicks", NBT.TAG_INT)
 						? Math.abs(data.getInt("MaxTicks"))
 						: (isUpsideDown ? WellData.UPSIDE_DEFAULT : WellData.REGULAR_DEFAULT).maxToFill);
 				
 				// handle biomes
-				List<ResourceLocation> biomes = new ArrayList<>();
-				data.getList("Biomes", Tag.TAG_STRING)
-						.forEach(biomeNbt -> biomes.add(new ResourceLocation(biomeNbt.getAsString())));				
+				List<Biome> biomes = new ArrayList<>();
+				data.getList("Biomes", NBT.TAG_STRING).forEach(biomeNbt -> biomes
+						.add(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeNbt.getAsString()))));
 				
 				// handle biome tags
-				List<ResourceLocation> biomeTags = new ArrayList<>();
-				data.getList("BiomeTags", Tag.TAG_STRING)
-						.forEach(biomeTagNbt -> biomeTags.add(new ResourceLocation(biomeTagNbt.getAsString())));
+				List<BiomeDictionary.Type> biomeTags = new ArrayList<>();
+				data.getList("BiomeTags", NBT.TAG_STRING)
+						.forEach(biomeTagNbt -> biomeTags.add(BiomeDictionary.Type.getType(biomeTagNbt.getAsString())));
 				
 				WellData wellData;
 				if (biomes.isEmpty() && biomeTags.isEmpty()) {
@@ -133,18 +135,18 @@ public class WellConfig {
 		return !onlyOnePerChunk.get() || nearbyWells == 1;
 	}
 	
-	public static FluidStack getFillFluid(Biome biome, Level level, BlockPos pos, boolean upsideDown, int nearbyWells) {
+	public static FluidStack getFillFluid(Biome biome, World level, BlockPos pos, boolean upsideDown, int nearbyWells) {
 		WellData data = getWellDataForBiome(biome, level, upsideDown);
 		FluidStack fluid = data.fluid.copy();
 		return fluid;
 	}
 	
-	public static int getFillDelay(Biome biome, Level level, Random random, boolean upsideDown) {
+	public static int getFillDelay(Biome biome, World level, Random random, boolean upsideDown) {
 		WellData data = getWellDataForBiome(biome, level, upsideDown);
-		return Mth.nextInt(random, data.minToFill, data.maxToFill);
+		return MathHelper.nextInt(random, data.minToFill, data.maxToFill);
 	}
 	
-	private static WellData getWellDataForBiome(Biome biome, Level level, boolean upsideDown) {
+	private static WellData getWellDataForBiome(Biome biome, World level, boolean upsideDown) {
 		for (WellData wellData : (upsideDown ? upsideWellDataList : regularWellDataList)) {
 			if (wellData.hasBiome(biome, level)) return wellData;
 		}

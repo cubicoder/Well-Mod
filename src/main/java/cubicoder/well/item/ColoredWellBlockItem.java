@@ -1,15 +1,15 @@
 package cubicoder.well.item;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CauldronBlock;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LayeredCauldronBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.world.World;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 public class ColoredWellBlockItem extends BlockItem {
@@ -17,27 +17,29 @@ public class ColoredWellBlockItem extends BlockItem {
 	public ColoredWellBlockItem(Block block, Properties properties) {
 		super(block, properties);
 	}
-
+	
 	@Override
-	public InteractionResult useOn(UseOnContext context) {
-		Level level = context.getLevel();
-		Player player = context.getPlayer();
+	public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
+		if (context.getPlayer().isCrouching()) return super.onItemUseFirst(stack, context);
+		
+		World level = context.getLevel();
+		PlayerEntity player = context.getPlayer();
 		BlockState state = level.getBlockState(context.getClickedPos());
-		if (state.getBlock() instanceof LayeredCauldronBlock) {
+		if (state.getBlock() instanceof CauldronBlock) {
 			if (!level.isClientSide && !player.isCreative()) {
-				int cauldronLevel = state.getValue(LayeredCauldronBlock.LEVEL);
+				int cauldronLevel = state.getValue(CauldronBlock.LEVEL);
 				if (cauldronLevel > 0) {
 					player.getItemInHand(context.getHand()).shrink(1);
 					player.awardStat(Stats.USE_CAULDRON);
 					ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(ModItems.WELL.get()));
-					LayeredCauldronBlock.lowerFillLevel(state, level, context.getClickedPos());
+					((CauldronBlock) state.getBlock()).setWaterLevel(level, context.getClickedPos(), state, cauldronLevel - 1);
 				}
 			}
 			
-			return InteractionResult.SUCCESS;
+			return ActionResultType.SUCCESS;
 		}
 		
-		return super.useOn(context);
+		return super.onItemUseFirst(stack, context);
 	}
 	
 }

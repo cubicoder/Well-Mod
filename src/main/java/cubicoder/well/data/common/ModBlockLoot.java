@@ -2,12 +2,12 @@ package cubicoder.well.data.common;
 
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
-import net.minecraft.data.loot.BlockLoot;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.block.Block;
+import net.minecraft.data.loot.BlockLootTables;
+import net.minecraft.state.properties.DoubleBlockHalf;
+import net.minecraftforge.fml.RegistryObject;
 
-public class ModBlockLoot extends BlockLoot {
+public class ModBlockLoot extends BlockLootTables {
 
 	@Override
 	protected void addTables() {
