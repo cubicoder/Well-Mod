@@ -166,19 +166,22 @@ public class WellBlock extends BaseEntityBlock {
 			return super.canSurvive(state, level, pos);
 		} else {
 			BlockState base = level.getBlockState(pos.below(state.getValue(UPSIDE_DOWN) ? -1 : 1));
-			return base.is(this) && base.getValue(HALF) == DoubleBlockHalf.UPPER;
+			if (state.getBlock() != this) return super.canSurvive(state, level, pos);
+			return base.is(this) && base.getValue(HALF) == DoubleBlockHalf.LOWER;
 		}
 	}
 	
 	@Override
 	public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
 		if (!level.isClientSide) {
-			if (player.isCreative()) {
-				if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
-					BlockPos otherPos = pos.below(state.getValue(UPSIDE_DOWN) ? -1 : 1);
-					BlockState otherState = level.getBlockState(otherPos);
-					if (otherState.is(this) && otherState.getValue(HALF) == DoubleBlockHalf.LOWER) {
-						level.setBlock(otherPos, Blocks.AIR.defaultBlockState(), 35);
+			if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
+				BlockPos otherPos = pos.below(state.getValue(UPSIDE_DOWN) ? -1 : 1);
+				BlockState otherState = level.getBlockState(otherPos);
+				if (otherState.is(this) && otherState.getValue(HALF) == DoubleBlockHalf.LOWER) {
+					if (player.isCreative()) {
+						level.destroyBlock(otherPos, false, player);
+					} else {
+						level.destroyBlock(otherPos, canHarvestBlock(state, level, pos, player), player);
 					}
 				}
 			}
@@ -186,7 +189,7 @@ public class WellBlock extends BaseEntityBlock {
 
 		super.playerWillDestroy(level, pos, state, player);
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
