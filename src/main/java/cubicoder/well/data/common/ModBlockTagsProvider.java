@@ -1,23 +1,27 @@
 package cubicoder.well.data.common;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.jetbrains.annotations.Nullable;
 
 import cubicoder.well.WellMod;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.tags.ModBlockTags;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class ModBlockTagsProvider extends BlockTagsProvider {
 
-	public ModBlockTagsProvider(DataGenerator generator, @Nullable ExistingFileHelper existingFileHelper) {
-		super(generator, WellMod.MODID, existingFileHelper);
+	public ModBlockTagsProvider(PackOutput output, CompletableFuture<Provider> lookupProvider,
+			@Nullable ExistingFileHelper existingFileHelper) {
+		super(output, lookupProvider, WellMod.MODID, existingFileHelper);
 	}
 
 	@Override
-	protected void addTags() {
+	protected void addTags(Provider provider) {
 		tag(ModBlockTags.WELLS).add(
 				ModBlocks.WELL.get(),
 				ModBlocks.WHITE_WELL.get(),

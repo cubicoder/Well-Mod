@@ -16,11 +16,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.FluidHandlerBlockEntity;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.fluids.capability.TileFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 
-public class WellBlockEntity extends TileFluidHandler {
+public class WellBlockEntity extends FluidHandlerBlockEntity {
 
 	public int fillTick = 0;
 	public int nearbyWells = 1;
@@ -152,14 +152,14 @@ public class WellBlockEntity extends TileFluidHandler {
 			this.well = well;
 			setValidator(fluid -> {
 				// well is upside down, only allow upside down fluids, or vice versa
-				boolean isLighterThanAir = fluid.getFluid().getAttributes().isLighterThanAir();
+				boolean isLighterThanAir = fluid.getFluid().getFluidType().isLighterThanAir();
 				if (this.well.isUpsideDown()) {
 					return isLighterThanAir;
 				} else if (isLighterThanAir) return false;
 				
 				// no fluids that evaporate
-				if (this.well.getLevel().dimensionType().ultraWarm() && fluid.getFluid().getAttributes()
-						.doesVaporize(this.well.getLevel(), this.well.getBlockPos(), fluid))
+				if (this.well.getLevel().dimensionType().ultraWarm() && fluid.getFluid().getFluidType()
+						.isVaporizedOnPlacement(this.well.getLevel(), this.well.getBlockPos(), fluid))
 					return false;
 				
 				return true;
@@ -190,7 +190,8 @@ public class WellBlockEntity extends TileFluidHandler {
 		
 		protected boolean updateLight(FluidStack resource) {
 			if (resource != null) {
-				if (resource.getFluid().getAttributes().getLuminosity() > 0) {
+				if (resource.getFluid().getFluidType().getLightLevel(resource.getFluid().defaultFluidState(),
+						well.getLevel(), well.getBlockPos()) > 0) {
 					well.getLevel().getLightEngine().checkBlock(well.getBlockPos());
 					return true;
 				}

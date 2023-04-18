@@ -25,6 +25,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', "${mod_id}"
 
+            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             mods {
                 well {
                     source sourceSets.main
@@ -38,6 +42,10 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', "${mod_id}"
+            
+            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 well {
@@ -54,7 +62,11 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
+            property 'forge.enabledGameTestNamespaces', "${mod_id}"
+            
+            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 well {
@@ -68,6 +80,10 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            
+            // to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             args '--mod', "${mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
@@ -120,17 +136,17 @@ dependencies {
     //implementation fg.deobf("curse.maven:portable-tanks-503920:4024684")
     //implementation fg.deobf("curse.maven:supermartijn642s-core-lib-454372:3863129")
     //implementation fg.deobf("curse.maven:supermartijn642s-config-lib-438332:3862966")
-    //implementation fg.deobf("curse.maven:largefluidtank-291006:4074087")
-    //implementation fg.deobf("curse.maven:scalable-cats-force-320926:4059979")
-    implementation fg.deobf("curse.maven:cofh-core-69162:4385216") // 1.19.2
-    implementation fg.deobf("curse.maven:thermal-foundation-222880:4382373") // 1.19.2
-    implementation fg.deobf("curse.maven:thermal-expansion-69163:4382371") // 1.19.2
-    implementation fg.deobf("curse.maven:thermal-innovation-291737:4382374") // 1.19.2
-    implementation fg.deobf("curse.maven:thermal-dynamics-227443:4391160") // 1.19.2
+    implementation fg.deobf("curse.maven:largefluidtank-291006:4461010")
+    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4183340")
+    //implementation fg.deobf("curse.maven:cofh-core-69162:4385216") // 1.19.2
+    //implementation fg.deobf("curse.maven:thermal-foundation-222880:4382373") // 1.19.2
+    //implementation fg.deobf("curse.maven:thermal-expansion-69163:4382371") // 1.19.2
+    //implementation fg.deobf("curse.maven:thermal-innovation-291737:4382374") // 1.19.2
+    //implementation fg.deobf("curse.maven:thermal-dynamics-227443:4391160") // 1.19.2
     //implementation fg.deobf("curse.maven:patchouli-306770:3846086")
-    implementation fg.deobf("curse.maven:itank-256991:3921315") // 1.19.2
+    //implementation fg.deobf("curse.maven:itank-256991:3921315") // 1.19.2
     implementation fg.deobf("curse.maven:gamemenumodoption-353051:4440228")
-    implementation fg.deobf("curse.maven:reauth-237701:4408013") // 1.19.3
+    //implementation fg.deobf("curse.maven:reauth-237701:4408013") // 1.19.3
     implementation fg.deobf("curse.maven:biomes-o-plenty-220318:4472740")
     implementation fg.deobf("curse.maven:terrablender-563928:4458636")
 }

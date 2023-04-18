@@ -4,7 +4,7 @@ import cubicoder.well.WellMod;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import net.minecraft.core.Direction.Axis;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
@@ -17,16 +17,17 @@ import net.minecraftforge.client.model.generators.ModelFile.ExistingModelFile;
 import net.minecraftforge.client.model.generators.ModelFile.UncheckedModelFile;
 import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ModBlockStateProvider extends BlockStateProvider {
 
 	private ExistingModelFile wellBase;
-	
-	public ModBlockStateProvider(DataGenerator gen, ExistingFileHelper exFileHelper) {
-		super(gen, WellMod.MODID, exFileHelper);
+
+	public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
+		super(output, WellMod.MODID, exFileHelper);
 		wellBase = new ExistingModelFile(modLoc(BlockModelProvider.BLOCK_FOLDER + "/well_base"), exFileHelper);
 	}
-
+	
 	@Override
 	protected void registerStatesAndModels() {
 		ModBlocks.BLOCKS.getEntries().forEach(block -> {
@@ -37,21 +38,21 @@ public class ModBlockStateProvider extends BlockStateProvider {
 	}
 	
 	private BlockModelBuilder wellBlockRoof(Block block) {
-		String path = block.getRegistryName().getPath();
+		String path = ForgeRegistries.BLOCKS.getKey(block).getPath();
 		String color = path.length() > 4 ? path.substring(0, path.length() - 5) : "brick";
 		return this.models().withExistingParent(path + "_roof", modLoc(BlockModelProvider.BLOCK_FOLDER + "/template_well_roof"))
 				.texture("roof", modLoc(BlockModelProvider.BLOCK_FOLDER + "/" + color + "_roof"));
 	}
 	
 	private ItemModelBuilder wellItemModel(Block block) {
-		String path = block.getRegistryName().getPath();
+		String path = ForgeRegistries.BLOCKS.getKey(block).getPath();
 		String color = path.length() > 4 ? path.substring(0, path.length() - 5) : "brick";
 		return this.itemModels().withExistingParent(path, modLoc(ItemModelProvider.BLOCK_FOLDER + "/template_well"))
 				.texture("roof", modLoc(ItemModelProvider.BLOCK_FOLDER + "/" + color + "_roof"));
 	}
 	
 	private VariantBlockStateBuilder wellBlockState(Block block) {
-		String path = block.getRegistryName().getPath();
+		String path = ForgeRegistries.BLOCKS.getKey(block).getPath();
 		String color = path.length() > 4 ? path.substring(0, path.length() - 5) + "_" : "";
 		UncheckedModelFile wellRoof = new UncheckedModelFile(modLoc(BlockModelProvider.BLOCK_FOLDER + "/" + color + "well_roof"));
 		return this.getVariantBuilder(block)

@@ -2,16 +2,17 @@ package cubicoder.well.data.client;
 
 import cubicoder.well.WellMod;
 import cubicoder.well.block.ModBlocks;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ModItemModelProvider extends ItemModelProvider {
 
-	public ModItemModelProvider(DataGenerator generator, ExistingFileHelper existingFileHelper) {
-		super(generator, WellMod.MODID, existingFileHelper);
+	public ModItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
+		super(output, WellMod.MODID, existingFileHelper);
 	}
 
 	@Override
@@ -36,7 +37,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 	}
 
 	private ItemModelBuilder wellBlockItem(Block block) {
-		String path = block.getRegistryName().getPath();
+		String path = ForgeRegistries.BLOCKS.getKey(block).getPath();
 		String color = path.length() > 4 ? path.substring(0, path.length() - 5) : "brick";
 		return withExistingParent(path, modLoc(BLOCK_FOLDER + "/well")).texture("roof", modLoc(BLOCK_FOLDER + "/" + color + "_roof"));
 	}

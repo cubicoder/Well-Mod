@@ -1,18 +1,17 @@
 package cubicoder.well.block;
 
-import java.util.Random;
-
 import cubicoder.well.block.entity.WellBlockEntity;
 import cubicoder.well.config.WellConfig;
 import cubicoder.well.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -39,6 +38,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
@@ -50,9 +50,9 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 public class WellBlock extends BaseEntityBlock {
 
@@ -153,7 +153,7 @@ public class WellBlock extends BaseEntityBlock {
 			BlockEntity be = level.getBlockEntity(pos);
 			if (be instanceof WellBlockEntity && ((WellBlockEntity) be).nearbyWells > 1) {
 				String message = state.getValue(UPSIDE_DOWN) ? "warn.well.onePerChunkFlipped" : "warn.well.onePerChunk";
-				((ServerPlayer) placer).displayClientMessage(new TranslatableComponent(message), true);
+				((ServerPlayer) placer).displayClientMessage(Component.translatable(message), true);
 			}
 				
 		}
@@ -208,7 +208,7 @@ public class WellBlock extends BaseEntityBlock {
 			return InteractionResult.PASS;
 		}
 		
-		if (!player.getItemInHand(hand).getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
+		if (!player.getItemInHand(hand).getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
 			return InteractionResult.PASS;
 		}
 		
@@ -245,11 +245,12 @@ public class WellBlock extends BaseEntityBlock {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
 			BlockEntity be = level.getBlockEntity(pos);
 			if (be instanceof WellBlockEntity) {
-				FluidStack fluid = ((WellBlockEntity) be).getTank().getFluid();
-				if (fluid != null && !fluid.isEmpty()) {
-					int baseFluidLight = fluid.getFluid().getAttributes().getLuminosity();
+				FluidStack fluidStack = ((WellBlockEntity) be).getTank().getFluid();
+				if (fluidStack != null && !fluidStack.isEmpty()) {
+					Fluid fluid = fluidStack.getFluid();
+					int baseFluidLight = fluid.getFluidType().getLightLevel(fluid.defaultFluidState(), be.getLevel(), pos);
 					if (baseFluidLight > 0) {
-						return Mth.clamp((int) (baseFluidLight * fluid.getAmount() / WellConfig.tankCapacity.get() + 0.5), 1, 15);
+						return Mth.clamp((int) (baseFluidLight * fluidStack.getAmount() / WellConfig.tankCapacity.get() + 0.5), 1, 15);
 					}
 				}
 			}
@@ -270,9 +271,10 @@ public class WellBlock extends BaseEntityBlock {
 					int amount = well.getTank().getFluidAmount();
 					int capacity = well.getTank().getCapacity();
 					boolean upsideDown = state.getValue(UPSIDE_DOWN);
-					FluidState fluidState = fluid.getFluid().getAttributes().getStateForPlacement(level, pos, fluid);
-					Material fluidMaterial = fluid.getFluid().getAttributes().getBlock(level, pos, fluidState).getMaterial();
+					FluidState fluidState = fluid.getFluid().getFluidType().getStateForPlacement(level, pos, fluid);
+					Material fluidMaterial = fluid.getFluid().getFluidType().getBlockForFluidState(level, pos, fluidState).getMaterial();
 
+					// TODO revamp for new fluid system - no hardcoded behavior if possible, just look into this
 					if (!upsideDown) {
 						if (entity.getY() < (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
 							// hardcoded behavior for lava and water based on cauldron
@@ -297,7 +299,7 @@ public class WellBlock extends BaseEntityBlock {
 	}
 	
 	@Override
-	public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
 			BlockEntity be = level.getBlockEntity(pos);
 			if (be instanceof WellBlockEntity) {

@@ -2,7 +2,6 @@ package cubicoder.well.config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -11,7 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -81,7 +80,7 @@ public class WellConfig {
 				FluidStack fluid = FluidStack.loadFluidStackFromNBT(data.getCompound("Fluid"));
 				if (fluid == null) return;
 				
-				boolean isUpsideDown = fluid.getFluid().getAttributes().isLighterThanAir();
+				boolean isUpsideDown = fluid.getFluid().getFluidType().isLighterThanAir();
 				
 				// fill delays
 				int minToFill = (data.contains("MinTicks", Tag.TAG_INT)
@@ -139,9 +138,9 @@ public class WellConfig {
 		return fluid;
 	}
 	
-	public static int getFillDelay(Biome biome, Level level, Random random, boolean upsideDown) {
+	public static int getFillDelay(Biome biome, Level level, RandomSource random, boolean upsideDown) {
 		WellData data = getWellDataForBiome(biome, level, upsideDown);
-		return Mth.nextInt(random, data.minToFill, data.maxToFill);
+		return random.nextInt(data.minToFill, data.maxToFill);
 	}
 	
 	private static WellData getWellDataForBiome(Biome biome, Level level, boolean upsideDown) {

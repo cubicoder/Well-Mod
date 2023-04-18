@@ -1,16 +1,23 @@
 package cubicoder.well.data.common;
 
+import java.util.Set;
+
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
-import net.minecraft.data.loot.BlockLoot;
+import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraftforge.registries.RegistryObject;
 
-public class ModBlockLoot extends BlockLoot {
+public class ModBlockLoot extends BlockLootSubProvider {
+
+	public ModBlockLoot() {
+		super(Set.of(), FeatureFlags.REGISTRY.allFlags());
+	}
 
 	@Override
-	protected void addTables() {
+	protected void generate() {
 		addWell(ModBlocks.WELL.get());
 		addWell(ModBlocks.WHITE_WELL.get());
 		addWell(ModBlocks.ORANGE_WELL.get());

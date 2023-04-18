@@ -1,8 +1,9 @@
 package cubicoder.well.client;
 
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 
 import cubicoder.well.block.WellBlock;
 import cubicoder.well.block.entity.WellBlockEntity;
@@ -12,8 +13,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 
 public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 
@@ -28,11 +33,16 @@ public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 			int capacity = well.getTank().getCapacity();
 			boolean upsideDown = well.isUpsideDown();
 
-			fluid.getFluid().getAttributes().getStillTexture(fluid);
+			Level level = well.getLevel();
+			BlockPos pos = well.getBlockPos();
+			
+			FluidType fluidType = fluid.getFluid().getFluidType();
+			IClientFluidTypeExtensions fluidEx = IClientFluidTypeExtensions.of(fluidType.getStateForPlacement(level, pos, fluid));
+			
 			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-					.apply(fluid.getFluid().getAttributes().getStillTexture(fluid));
+					.apply(fluidEx.getStillTexture(fluid));
 
-			int color = fluid.getFluid().getAttributes().getColor(well.getLevel(), well.getBlockPos());
+			int color = fluidEx.getTintColor(fluidType.getStateForPlacement(level, pos, fluid), level, pos);
 
 			float corner = 3F / 16F;
 			float height = WellBlock.getFluidRenderHeight(amount, capacity, upsideDown);
