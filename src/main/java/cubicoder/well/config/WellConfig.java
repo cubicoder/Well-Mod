@@ -1,6 +1,7 @@
 package cubicoder.well.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -61,7 +62,7 @@ public class WellConfig {
 		dataList = builder
 				.comment("Handle what fluids wells collect based on biome, and how much")
 				.translation("config.well.data")
-				.defineListAllowEmpty(List.of("dataList"), () -> List.of("{}"), WellConfig::validateData);
+				.defineListAllowEmpty(Collections.singletonList("dataList"), () -> Collections.singletonList("{}"), WellConfig::validateData);
 		return builder.build();
 	}
 	

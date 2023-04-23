@@ -1,5 +1,7 @@
 package cubicoder.well.data.common;
 
+import java.util.stream.Collectors;
+
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import net.minecraft.block.Block;
@@ -32,7 +34,7 @@ public class ModBlockLoot extends BlockLootTables {
 
 	@Override
 	protected Iterable<Block> getKnownBlocks() {
-		return ModBlocks.BLOCKS.getEntries().stream().map(RegistryObject::get).toList();
+		return ModBlocks.BLOCKS.getEntries().stream().map(RegistryObject::get).collect(Collectors.toList());
 	}
 	
 	private void addWell(Block block) {
