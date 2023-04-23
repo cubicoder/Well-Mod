@@ -28,7 +28,6 @@ public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 			int capacity = well.getTank().getCapacity();
 			boolean upsideDown = well.isUpsideDown();
 
-			fluid.getFluid().getAttributes().getStillTexture(fluid);
 			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
 					.apply(fluid.getFluid().getAttributes().getStillTexture(fluid));
 
