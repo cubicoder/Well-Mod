@@ -119,7 +119,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.4-45.0.43'
+    minecraft 'net.minecraftforge:forge:1.19.4-45.0.47'
 
     compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
@@ -129,7 +129,7 @@ dependencies {
     
     implementation fg.deobf("curse.maven:jade-324717:${jade_fileid}")
     
-    implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
+    //implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
     implementation fg.deobf("curse.maven:configured-457570:${configured_fileid}")
     
     implementation fg.deobf("curse.maven:pipez-443900:4438557")
