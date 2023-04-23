@@ -37,7 +37,23 @@ public final class WellMod {
 	
 	private void buildTabContents(CreativeModeTabEvent.BuildContents event) {
 		if (event.getTab() == CreativeModeTabs.COLORED_BLOCKS || event.getTab() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
-			ModItems.ITEMS.getEntries().forEach(item -> event.accept(item));
+			event.accept(ModItems.WELL);
+			event.accept(ModItems.WHITE_WELL);
+			event.accept(ModItems.LIGHT_GRAY_WELL);
+			event.accept(ModItems.GRAY_WELL);
+			event.accept(ModItems.BLACK_WELL);
+			event.accept(ModItems.BROWN_WELL);
+			event.accept(ModItems.RED_WELL);
+			event.accept(ModItems.ORANGE_WELL);
+			event.accept(ModItems.YELLOW_WELL);
+			event.accept(ModItems.LIME_WELL);
+			event.accept(ModItems.GREEN_WELL);
+			event.accept(ModItems.CYAN_WELL);
+			event.accept(ModItems.LIGHT_BLUE_WELL);
+			event.accept(ModItems.BLUE_WELL);
+			event.accept(ModItems.PURPLE_WELL);
+			event.accept(ModItems.MAGENTA_WELL);
+			event.accept(ModItems.PINK_WELL);
 		}
 	}
 	

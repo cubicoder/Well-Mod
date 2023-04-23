@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import cubicoder.well.WellMod;
 import cubicoder.well.data.client.ModBlockStateProvider;
+import cubicoder.well.data.client.ModSpriteSourceProvider;
 import cubicoder.well.data.common.ModBlockLoot;
 import cubicoder.well.data.common.ModBlockTagsProvider;
 import cubicoder.well.data.common.ModItemTagsProvider;
@@ -38,6 +39,7 @@ public class DataGenerators {
 				List.of(new LootTableProvider.SubProviderEntry(ModBlockLoot::new, LootContextParamSets.BLOCK))));
 		
 		gen.addProvider(event.includeClient(), new ModBlockStateProvider(output, fileHelper));
+		gen.addProvider(event.includeClient(), new ModSpriteSourceProvider(output, fileHelper));
 		//gen.addProvider(event.includeClient(), new ModItemModelProvider(output, event.getExistingFileHelper()));
 	}
 	
