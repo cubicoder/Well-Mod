@@ -119,7 +119,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.4-45.0.47'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.2.21'
 
     compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
@@ -129,15 +129,15 @@ dependencies {
     
     implementation fg.deobf("curse.maven:jade-324717:${jade_fileid}")
     
-    //implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
+    implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
     implementation fg.deobf("curse.maven:configured-457570:${configured_fileid}")
     
-    implementation fg.deobf("curse.maven:pipez-443900:4438557")
+    implementation fg.deobf("curse.maven:pipez-443900:4629652")
     //implementation fg.deobf("curse.maven:portable-tanks-503920:4024684")
     //implementation fg.deobf("curse.maven:supermartijn642s-core-lib-454372:3863129")
     //implementation fg.deobf("curse.maven:supermartijn642s-config-lib-438332:3862966")
-    implementation fg.deobf("curse.maven:largefluidtank-291006:4461010")
-    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4183340")
+    implementation fg.deobf("curse.maven:largefluidtank-291006:4068254")
+    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4028119")
     //implementation fg.deobf("curse.maven:cofh-core-69162:4385216") // 1.19.2
     //implementation fg.deobf("curse.maven:thermal-foundation-222880:4382373") // 1.19.2
     //implementation fg.deobf("curse.maven:thermal-expansion-69163:4382371") // 1.19.2
@@ -145,10 +145,10 @@ dependencies {
     //implementation fg.deobf("curse.maven:thermal-dynamics-227443:4391160") // 1.19.2
     //implementation fg.deobf("curse.maven:patchouli-306770:3846086")
     //implementation fg.deobf("curse.maven:itank-256991:3921315") // 1.19.2
-    implementation fg.deobf("curse.maven:gamemenumodoption-353051:4440228")
-    //implementation fg.deobf("curse.maven:reauth-237701:4408013") // 1.19.3
-    implementation fg.deobf("curse.maven:biomes-o-plenty-220318:4472740")
-    implementation fg.deobf("curse.maven:terrablender-563928:4458636")
+    //implementation fg.deobf("curse.maven:gamemenumodoption-353051:4440228")
+    implementation fg.deobf("curse.maven:reauth-237701:4408013")
+    implementation fg.deobf("curse.maven:biomes-o-plenty-220318:4473556")
+    implementation fg.deobf("curse.maven:terrablender-563928:4618490")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
