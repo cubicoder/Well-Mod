@@ -3,6 +3,7 @@ package cubicoder.well.item;
 import cubicoder.well.WellMod;
 import cubicoder.well.block.ModBlocks;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -37,11 +38,13 @@ public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Forge
     }
 	
 	private static RegistryObject<BlockItem> fromBlock(RegistryObject<Block> block) {
-		return ITEMS.register(block.getId().getPath(), () -> new BlockItem(block.get(), new Item.Properties()));
+		return ITEMS.register(block.getId().getPath(), () -> new BlockItem(block.get(),
+				new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
 	}
 	
 	private static RegistryObject<BlockItem> fromColoredWell(RegistryObject<Block> block) {
-		return ITEMS.register(block.getId().getPath(), () -> new ColoredWellBlockItem(block.get(), new Item.Properties()));
+		return ITEMS.register(block.getId().getPath(), () -> new ColoredWellBlockItem(block.get(), 
+				new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
 	}
 	
 }

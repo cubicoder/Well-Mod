@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "/": {
       "tag": "forge:rods/wooden"
@@ -25,6 +24,5 @@
   ],
   "result": {
     "item": "well:well"
-  },
-  "show_notification": true
+  }
 }

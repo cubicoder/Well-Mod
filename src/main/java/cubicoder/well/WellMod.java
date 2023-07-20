@@ -6,8 +6,6 @@ import cubicoder.well.config.WellConfig;
 import cubicoder.well.item.ModItems;
 import cubicoder.well.sound.ModSounds;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -28,33 +26,10 @@ public final class WellMod {
 		IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
 		modbus.addListener(this::onClientSetup);
 		modbus.addListener(WellConfig::configChanged);
-		modbus.addListener(this::buildTabContents);
 	}
 	
 	private void onClientSetup(FMLClientSetupEvent event) {
 		event.enqueueWork(() -> BlockEntityRenderers.register(ModBlocks.WELL_BE.get(), WellRenderer::new));
-	}
-	
-	private void buildTabContents(CreativeModeTabEvent.BuildContents event) {
-		if (event.getTab() == CreativeModeTabs.COLORED_BLOCKS || event.getTab() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
-			event.accept(ModItems.WELL);
-			event.accept(ModItems.WHITE_WELL);
-			event.accept(ModItems.LIGHT_GRAY_WELL);
-			event.accept(ModItems.GRAY_WELL);
-			event.accept(ModItems.BLACK_WELL);
-			event.accept(ModItems.BROWN_WELL);
-			event.accept(ModItems.RED_WELL);
-			event.accept(ModItems.ORANGE_WELL);
-			event.accept(ModItems.YELLOW_WELL);
-			event.accept(ModItems.LIME_WELL);
-			event.accept(ModItems.GREEN_WELL);
-			event.accept(ModItems.CYAN_WELL);
-			event.accept(ModItems.LIGHT_BLUE_WELL);
-			event.accept(ModItems.BLUE_WELL);
-			event.accept(ModItems.PURPLE_WELL);
-			event.accept(ModItems.MAGENTA_WELL);
-			event.accept(ModItems.PINK_WELL);
-		}
 	}
 	
 }

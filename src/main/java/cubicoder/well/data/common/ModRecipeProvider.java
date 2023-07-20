@@ -3,9 +3,8 @@ package cubicoder.well.data.common;
 import java.util.function.Consumer;
 
 import cubicoder.well.block.ModBlocks;
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
@@ -18,13 +17,13 @@ import net.minecraftforge.common.Tags;
 
 public class ModRecipeProvider extends RecipeProvider {
 
-	public ModRecipeProvider(PackOutput output) {
-		super(output);
+	public ModRecipeProvider(DataGenerator generator) {
+		super(generator);
 	}
 
 	@Override
-	protected void buildRecipes(Consumer<FinishedRecipe> writer) {		
-		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.WELL.get())
+	protected void buildCraftingRecipes(Consumer<FinishedRecipe> writer) {		
+		ShapedRecipeBuilder.shaped(ModBlocks.WELL.get())
 				.pattern("RRR")
 				.pattern("/L/")
 				.pattern("SBS")
@@ -54,10 +53,9 @@ public class ModRecipeProvider extends RecipeProvider {
 		dyedWell(writer, ModBlocks.BLACK_WELL.get(), Tags.Items.DYES_BLACK);
 	}
 	
-	private void dyedWell(Consumer<FinishedRecipe> finishedRecipeConsumer, ItemLike dyedWell, TagKey<Item> dye) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.DECORATIONS, dyedWell).requires(dye)
-				.requires(ModBlocks.WELL.get()).group("wells").unlockedBy("has_well", has(ModBlocks.WELL.get()))
-				.save(finishedRecipeConsumer);
+	private void dyedWell(Consumer<FinishedRecipe> writer, ItemLike dyedWell, TagKey<Item> dye) {
+		ShapelessRecipeBuilder.shapeless(dyedWell).requires(dye).requires(ModBlocks.WELL.get()).group("wells")
+				.unlockedBy("has_well", has(ModBlocks.WELL.get())).save(writer);
 	}
 	
 }

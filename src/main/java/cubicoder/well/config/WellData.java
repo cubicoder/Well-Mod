@@ -5,7 +5,6 @@ import java.util.List;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
@@ -42,7 +41,7 @@ public class WellData {
 	}
 	
 	public boolean hasBiome(Biome biome, Level level) {
-		Registry<Biome> reg = level.registryAccess().registryOrThrow(Registries.BIOME);
+		Registry<Biome> reg = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
 		ResourceLocation biomeName = reg.getKey(biome);
 		
 		for (ResourceLocation loc : biomes) {
@@ -51,7 +50,7 @@ public class WellData {
 		
 		
 		for (ResourceLocation tag : biomeTags) {
-			for (Holder<Biome> b : reg.getOrCreateTag(TagKey.create(Registries.BIOME, tag))) {
+			for (Holder<Biome> b : reg.getOrCreateTag(TagKey.create(Registry.BIOME_REGISTRY, tag))) {
 				if (biomeName.equals(reg.getKey(b.value()))) return true;
 			}
 		}

@@ -2,7 +2,7 @@ package cubicoder.well.data.client;
 
 import cubicoder.well.WellMod;
 import cubicoder.well.block.ModBlocks;
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
@@ -11,8 +11,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class ModItemModelProvider extends ItemModelProvider {
 
-	public ModItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-		super(output, WellMod.MODID, existingFileHelper);
+	public ModItemModelProvider(DataGenerator gen, ExistingFileHelper existingFileHelper) {
+		super(gen, WellMod.MODID, existingFileHelper);
 	}
 
 	@Override

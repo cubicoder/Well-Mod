@@ -4,7 +4,7 @@ import cubicoder.well.WellMod;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import net.minecraft.core.Direction.Axis;
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
@@ -23,8 +23,8 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
 	private ExistingModelFile wellBase;
 
-	public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
-		super(output, WellMod.MODID, exFileHelper);
+	public ModBlockStateProvider(DataGenerator gen, ExistingFileHelper exFileHelper) {
+		super(gen, WellMod.MODID, exFileHelper);
 		wellBase = new ExistingModelFile(modLoc(BlockModelProvider.BLOCK_FOLDER + "/well_base"), exFileHelper);
 	}
 	
