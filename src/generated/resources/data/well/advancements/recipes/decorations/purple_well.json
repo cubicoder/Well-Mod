@@ -30,5 +30,6 @@
     "recipes": [
       "well:purple_well"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

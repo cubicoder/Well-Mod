@@ -1,0 +1,18 @@
+// 1.20.1	2023-08-21T20:48:03.1359311	Loot Tables
+66abd0636fc71f3b72de0f6de76be0708fd9c1f2 data/well/loot_tables/blocks/black_well.json
+e3c5f023377e2cf17d326a7eee6b6637b6762923 data/well/loot_tables/blocks/blue_well.json
+3c583b6d42beda6ffb8e6e9ceb90c560db9fd32d data/well/loot_tables/blocks/brown_well.json
+d1d1edf7e2abe0365b61811e7cbccef0442a8c1c data/well/loot_tables/blocks/cyan_well.json
+79b672fcb4703642bc92ce623279f146a63e4068 data/well/loot_tables/blocks/gray_well.json
+b030743eec9a67f924aed695ae83f5bf8babac38 data/well/loot_tables/blocks/green_well.json
+c1772b4f8267fb253c5e7c10b15319cce610ec11 data/well/loot_tables/blocks/light_blue_well.json
+7f553bae0ca1ce476d4c255851d1076a1bc1c400 data/well/loot_tables/blocks/light_gray_well.json
+f18b6ba5f9ee89e33548528c7394122333789dbf data/well/loot_tables/blocks/lime_well.json
+9334adab4a9e514007db113be97daa5ef779a920 data/well/loot_tables/blocks/magenta_well.json
+a1ed14d3c65ab464db44199ab22283178dca01cd data/well/loot_tables/blocks/orange_well.json
+459a0db7191148eb1048857c5b6f8d9a8577203b data/well/loot_tables/blocks/pink_well.json
+663b2fea98e1fb14b8d5b13ab7643a32183eeb4c data/well/loot_tables/blocks/purple_well.json
+b8578ecb2e290b2676482ff1833f865e2f466d24 data/well/loot_tables/blocks/red_well.json
+fd6eff85b140d0a80fde1364621f2de815301642 data/well/loot_tables/blocks/well.json
+0b54aaad167ae056b5bb06a5810d24e506c09885 data/well/loot_tables/blocks/white_well.json
+d42bbf3051bd88223bffb0a715f8154fc1094825 data/well/loot_tables/blocks/yellow_well.json

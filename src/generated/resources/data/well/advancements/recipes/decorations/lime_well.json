@@ -30,5 +30,6 @@
     "recipes": [
       "well:lime_well"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

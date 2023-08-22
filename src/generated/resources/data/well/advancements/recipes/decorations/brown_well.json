@@ -30,5 +30,6 @@
     "recipes": [
       "well:brown_well"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

@@ -7,7 +7,7 @@ import cubicoder.well.item.ModItems;
 import cubicoder.well.sound.ModSounds;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -35,8 +35,8 @@ public final class WellMod {
 		event.enqueueWork(() -> BlockEntityRenderers.register(ModBlocks.WELL_BE.get(), WellRenderer::new));
 	}
 	
-	private void buildTabContents(CreativeModeTabEvent.BuildContents event) {
-		if (event.getTab() == CreativeModeTabs.COLORED_BLOCKS || event.getTab() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
+	private void buildTabContents(BuildCreativeModeTabContentsEvent event) {
+		if (event.getTabKey() == CreativeModeTabs.COLORED_BLOCKS || event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
 			event.accept(ModItems.WELL);
 			event.accept(ModItems.WHITE_WELL);
 			event.accept(ModItems.LIGHT_GRAY_WELL);

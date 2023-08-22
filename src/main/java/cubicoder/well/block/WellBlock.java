@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -38,11 +39,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -50,8 +50,10 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 
 public class WellBlock extends BaseEntityBlock {
@@ -76,12 +78,9 @@ public class WellBlock extends BaseEntityBlock {
 			SHAPE_INNER_SUPPORT
 	);
 	
-	public WellBlock(MaterialColor mapColor) {
-		this(Material.STONE, mapColor);
-	}
-	
-	public WellBlock(Material material, MaterialColor mapColor) {
-		this(Properties.of(material).color(mapColor).strength(3.0F, 1.5F).requiresCorrectToolForDrops());
+	public WellBlock(DyeColor mapColor) {
+		this(Properties.of().mapColor(mapColor).instrument(NoteBlockInstrument.BASEDRUM).strength(1.5F, 6.0F)
+				.requiresCorrectToolForDrops());
 	}
 	
 	public WellBlock(Properties properties) {
@@ -271,18 +270,17 @@ public class WellBlock extends BaseEntityBlock {
 					int amount = well.getTank().getFluidAmount();
 					int capacity = well.getTank().getCapacity();
 					boolean upsideDown = state.getValue(UPSIDE_DOWN);
-					FluidState fluidState = fluid.getFluid().getFluidType().getStateForPlacement(level, pos, fluid);
-					Material fluidMaterial = fluid.getFluid().getFluidType().getBlockForFluidState(level, pos, fluidState).getMaterial();
-
-					// TODO revamp for new fluid system - no hardcoded behavior if possible, just look into this
+					FluidType fluidType = fluid.getFluid().getFluidType();
+					
 					if (!upsideDown) {
 						if (entity.getY() < (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
-							// hardcoded behavior for lava and water based on cauldron
-							if (fluidMaterial == Material.LAVA) {
+							// hardcoded behavior for lava based on cauldron
+							if (fluidType == ForgeMod.LAVA_TYPE.get()) {
 								entity.lavaHurt();
 							}
 							
-							if (fluidMaterial == Material.WATER) {
+							// should apply universally, not just for water
+							if (fluidType.canExtinguish(entity)) {
 								if (!level.isClientSide && entity.isOnFire()) {
 									entity.clearFire();
 								}
