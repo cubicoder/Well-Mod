@@ -1,10 +1,7 @@
 package cubicoder.well.client;
 
-import org.joml.Matrix4f;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-
 import cubicoder.well.block.WellBlock;
 import cubicoder.well.block.entity.WellBlockEntity;
 import net.minecraft.client.Minecraft;
@@ -16,9 +13,10 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
+import org.joml.Matrix4f;
 
 public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 
@@ -27,34 +25,32 @@ public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 	@Override
 	public void render(WellBlockEntity well, float partialTick, PoseStack poseStack,
 			MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-		FluidStack fluid = well.getTank().getFluid();
-		if (!fluid.isEmpty()) {
-			int amount = fluid.getAmount();
+		FluidStack fluidStack = well.getTank().getFluid();
+		if (!fluidStack.isEmpty()) {
+			int amount = fluidStack.getAmount();
 			int capacity = well.getTank().getCapacity();
 			boolean upsideDown = well.isUpsideDown();
+			
+			Fluid fluid = fluidStack.getFluid();
+			IClientFluidTypeExtensions fluidEx = IClientFluidTypeExtensions.of(fluid);
+			
+			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
+					.apply(fluidEx.getStillTexture(fluidStack));
 
 			Level level = well.getLevel();
 			BlockPos pos = well.getBlockPos();
-			
-			FluidType fluidType = fluid.getFluid().getFluidType();
-			IClientFluidTypeExtensions fluidEx = IClientFluidTypeExtensions.of(fluidType.getStateForPlacement(level, pos, fluid));
-			
-			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-					.apply(fluidEx.getStillTexture(fluid));
-
-			int color = fluidEx.getTintColor(fluidType.getStateForPlacement(level, pos, fluid), level, pos);
+			int color = fluidEx.getTintColor(fluid.getFluidType().getStateForPlacement(level, pos, fluidStack), level, pos);
 
 			float corner = 3F / 16F;
 			float height = WellBlock.getFluidRenderHeight(amount, capacity, upsideDown);
 
-			float minU = sprite.getU(3);
-			float maxU = sprite.getU(13);
-			float minV = sprite.getV(3);
-			float maxV = sprite.getV(13);
+			float minU = sprite.getU(3F / 16F);
+			float maxU = sprite.getU(13F / 16F);
+			float minV = sprite.getV(3F / 16F);
+			float maxV = sprite.getV(13F / 16F);
 			
 			VertexConsumer builder = bufferSource.getBuffer(RenderType.translucent());
 			Matrix4f matrix = poseStack.last().pose();
-			
 			if (upsideDown) {
 				builder.vertex(matrix, 1 - corner, height, corner).color(color).uv(maxU, minV).uv2(packedLight).normal(0, -1, 0).endVertex();
 				builder.vertex(matrix, 1 - corner, height, 1 - corner).color(color).uv(maxU, maxV).uv2(packedLight).normal(0, -1, 0).endVertex();

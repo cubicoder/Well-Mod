@@ -1,7 +1,8 @@
 plugins {
     id 'eclipse'
+    id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
@@ -30,12 +31,6 @@ minecraft {
 			// to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
         }
 
         client {
@@ -79,24 +74,26 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
-    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
+    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
+    runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
 
-    implementation fg.deobf("curse.maven:the-one-probe-245211:${top_fileid}")
+    // no Forge 1.20.4
+    //implementation fg.deobf("curse.maven:the-one-probe-245211:${top_fileid}")
     
     implementation fg.deobf("curse.maven:jade-324717:${jade_fileid}")
     
     implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
-    //implementation fg.deobf("curse.maven:configured-457570:${configured_fileid}")
-    
-    implementation fg.deobf("curse.maven:pipez-443900:4713656")
-    implementation fg.deobf("curse.maven:largefluidtank-291006:4705694")
-    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4646736")
-    implementation fg.deobf("curse.maven:itank-256991:4647928")
-    implementation fg.deobf("curse.maven:oauth-513857:4575495")
-    implementation fg.deobf("curse.maven:biomes-o-plenty-220318:4707270")
-    implementation fg.deobf("curse.maven:terrablender-563928:4647094")
+    implementation fg.deobf("curse.maven:configured-457570:${configured_fileid}")
+
+    // no Forge 1.20.4
+    //implementation fg.deobf("curse.maven:pipez-443900:4713656")
+    implementation fg.deobf("curse.maven:largefluidtank-291006:5187514")
+    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4973956")
+    implementation fg.deobf("curse.maven:biomes-o-plenty-220318:5300399")
+    implementation fg.deobf("curse.maven:terrablender-563928:5068217")
+    implementation fg.deobf("curse.maven:glitchcore-955399:5088441")
+    implementation fg.deobf("curse.maven:energized-power-782147:5401167")
 }
 
 tasks.named('processResources', ProcessResources).configure {
@@ -145,4 +142,15 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+eclipse {
+    // Run when importing the project
+    synchronizationTasks 'genEclipseRuns'
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }

@@ -142,7 +142,7 @@ public class WellBlockEntity extends FluidHandlerBlockEntity {
 	public FluidTank getTank() {
 		return tank;
 	}
-	
+
 	public static class WellFluidTank extends FluidTank {
 
 		private WellBlockEntity well;

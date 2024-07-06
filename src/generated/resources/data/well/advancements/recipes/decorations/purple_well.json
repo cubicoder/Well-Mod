@@ -22,14 +22,13 @@
   },
   "requirements": [
     [
-      "has_well",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_well"
     ]
   ],
   "rewards": {
     "recipes": [
       "well:purple_well"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }
