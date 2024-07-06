@@ -1,7 +1,5 @@
 package cubicoder.well.block.entity;
 
-import java.util.function.Consumer;
-
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import cubicoder.well.config.WellConfig;
@@ -15,18 +13,20 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.FluidHandlerBlockEntity;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
-public class WellBlockEntity extends FluidHandlerBlockEntity {
+import java.util.function.Consumer;
+
+public class WellBlockEntity extends BlockEntity {
 
 	public int fillTick = 0;
 	public int nearbyWells = 1;
 	public int delayUntilNextBucket = 0; // when filling an item from the well, delay before another can be filled
 	public boolean initialized;
-	
+	private WellFluidTank tank;
+
 	public WellBlockEntity(BlockPos pos, BlockState state) {
 		super(ModBlocks.WELL_BE.get(), pos, state);
 		tank = new WellFluidTank(this, WellConfig.tankCapacity.get());
@@ -46,7 +46,7 @@ public class WellBlockEntity extends FluidHandlerBlockEntity {
 			FluidStack fluidToFill = be.getFluidToFill();
 			int result = 0;
 			if (fluidToFill != null) {
-				result = be.tank.fill(fluidToFill, FluidAction.EXECUTE);
+				result = be.tank.fill(fluidToFill, IFluidHandler.FluidAction.EXECUTE);
 			}
 			if (result > 0) {
 				be.initFillTick();
@@ -167,7 +167,7 @@ public class WellBlockEntity extends FluidHandlerBlockEntity {
 		}
 		
 		@Override
-		public int fill(FluidStack resource, FluidAction action) {
+		public int fill(FluidStack resource, IFluidHandler.FluidAction action) {
 			int fill = well.getFluidToFill().getFluid() == resource.getFluid() ? super.fill(resource, action) : 0;
 			if (action.execute() && fill > 0) {
 				BlockState state = well.getBlockState();
@@ -178,7 +178,7 @@ public class WellBlockEntity extends FluidHandlerBlockEntity {
 		}
 		
 		@Override
-		public FluidStack drain(int maxDrain, FluidAction action) {
+		public FluidStack drain(int maxDrain, IFluidHandler.FluidAction action) {
 			FluidStack resource = super.drain(maxDrain, action);
 			if (resource != null && action.execute()) {
 				BlockState state = well.getBlockState();

@@ -1,19 +1,19 @@
 package cubicoder.well.data.common;
 
-import java.util.Set;
-
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
+import net.minecraft.core.Holder;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.registries.RegistryObject;
 
-public class ModBlockLoot extends BlockLootSubProvider {
+import java.util.Collections;
 
-	public ModBlockLoot() {
-		super(Set.of(), FeatureFlags.REGISTRY.allFlags());
+public class ModBlockLootSubProvider extends BlockLootSubProvider {
+
+	public ModBlockLootSubProvider() {
+		super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags());
 	}
 
 	@Override
@@ -39,13 +39,11 @@ public class ModBlockLoot extends BlockLootSubProvider {
 
 	@Override
 	protected Iterable<Block> getKnownBlocks() {
-		return ModBlocks.BLOCKS.getEntries().stream().map(RegistryObject::get).toList();
+		return ModBlocks.BLOCKS.getEntries().stream().map(Holder::value).toList();
 	}
 	
 	private void addWell(Block block) {
-		this.add(block, (b) -> {
-			return createSinglePropConditionTable(block, WellBlock.HALF, DoubleBlockHalf.LOWER);
-		});
+		this.add(block, (b) -> createSinglePropConditionTable(block, WellBlock.HALF, DoubleBlockHalf.LOWER));
 	}
 	
 }

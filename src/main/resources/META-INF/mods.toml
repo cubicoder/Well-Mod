@@ -8,7 +8,7 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 updateJSONURL="https://raw.githubusercontent.com/cubicoder/Versions/main/well-update.json"
-displayURL="https://github.com/cubicoder/Well-Mod"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/just-a-well"
 itemIcon="well:well"
 logoFile="well_logo.png"
 credits="foreck and jbredwards for original idea"
@@ -16,15 +16,15 @@ authors="${mod_authors}"
 description='''${mod_description}'''
 
 [[dependencies.${mod_id}]]
-    modId="forge"
-    mandatory=true
-    versionRange="${forge_version_range}"
+    modId="neoforge"
+    type="required"
+    versionRange="${neo_version_range}"
     ordering="NONE"
     side="BOTH"
 	
 [[dependencies.${mod_id}]]
     modId="minecraft"
-    mandatory=true
+    type="required"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"

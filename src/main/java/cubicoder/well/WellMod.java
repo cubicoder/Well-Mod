@@ -1,17 +1,17 @@
 package cubicoder.well;
 
 import cubicoder.well.block.ModBlocks;
-import cubicoder.well.client.WellRenderer;
+import cubicoder.well.client.ClientEvents;
 import cubicoder.well.config.WellConfig;
+import cubicoder.well.data.DataGenerators;
 import cubicoder.well.item.ModItems;
 import cubicoder.well.sound.ModSounds;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 @Mod(WellMod.MODID)
 public final class WellMod {
@@ -19,20 +19,16 @@ public final class WellMod {
 	public static final String MODID = "well";
 	public static final String MOD_NAME = "Well Mod";
 
-	public WellMod() {
-		ModBlocks.init();
-		ModItems.init();
-		ModSounds.init();
+	public WellMod(IEventBus modBus) {
+		ModBlocks.init(modBus);
+		ModItems.init(modBus);
+		ModSounds.init(modBus);
 		WellConfig.init();
 		
-		IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
-		modbus.addListener(this::onClientSetup);
-		modbus.addListener(WellConfig::configChanged);
-		modbus.addListener(this::buildTabContents);
-	}
-	
-	private void onClientSetup(FMLClientSetupEvent event) {
-		event.enqueueWork(() -> BlockEntityRenderers.register(ModBlocks.WELL_BE.get(), WellRenderer::new));
+		if (FMLEnvironment.dist == Dist.CLIENT) modBus.addListener(ClientEvents::registerEntityRenderers);
+		modBus.addListener(DataGenerators::gatherData);
+		modBus.addListener(WellConfig::configChanged);
+		modBus.addListener(this::buildTabContents);
 	}
 	
 	private void buildTabContents(BuildCreativeModeTabContentsEvent event) {

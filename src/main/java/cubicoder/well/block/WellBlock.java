@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.*;
@@ -41,11 +42,11 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.FluidUtil;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidUtil;
 
 public class WellBlock extends Block implements EntityBlock {
 
@@ -70,12 +71,11 @@ public class WellBlock extends Block implements EntityBlock {
 	);
 	
 	public WellBlock(DyeColor mapColor) {
-		this(Properties.of().mapColor(mapColor).instrument(NoteBlockInstrument.BASEDRUM).strength(1.5F, 6.0F)
+		super(BlockBehaviour.Properties.of()
+				.mapColor(mapColor)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(1.5F, 6.0F)
 				.requiresCorrectToolForDrops());
-	}
-	
-	public WellBlock(Properties properties) {
-		super(properties);
 		this.registerDefaultState(this.getStateDefinition().any()
 				.setValue(AXIS, Direction.Axis.X)
 				.setValue(HALF, DoubleBlockHalf.LOWER)
@@ -203,7 +203,7 @@ public class WellBlock extends Block implements EntityBlock {
 			return InteractionResult.PASS;
 		}
 		
-		if (!player.getItemInHand(hand).getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
+		if (player.getItemInHand(hand).getCapability(Capabilities.FluidHandler.ITEM) != null) {
 			return InteractionResult.PASS;
 		}
 		
@@ -271,7 +271,7 @@ public class WellBlock extends Block implements EntityBlock {
 					if (!upsideDown) {
 						if (entity.getY() < (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
 							// hardcoded behavior for lava based on cauldron
-							if (fluidType == ForgeMod.LAVA_TYPE.get()) {
+							if (fluidType == NeoForgeMod.LAVA_TYPE) {
 								entity.lavaHurt();
 							}
 							

@@ -1,21 +1,22 @@
 package cubicoder.well.sound;
 
 import cubicoder.well.WellMod;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.function.Supplier;
 
 public class ModSounds {
 
-	public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, WellMod.MODID);
+	public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, WellMod.MODID);
 	
-	public static final RegistryObject<SoundEvent> CRANK = SOUND_EVENTS.register("block.well.crank", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(WellMod.MODID, "block.well.crank")));
+	public static final Supplier<SoundEvent> CRANK = SOUND_EVENTS.register("block.well.crank", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(WellMod.MODID, "block.well.crank")));
 	
-	public static void init() {
-		SOUND_EVENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
+	public static void init(IEventBus modBus) {
+		SOUND_EVENTS.register(modBus);
 	}
 	
 }

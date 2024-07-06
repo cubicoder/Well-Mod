@@ -1,67 +1,22 @@
 plugins {
+    id 'java-library'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'net.neoforged.gradle.userdev' version '7.0.97'
 }
 
 version = "${minecraft_version}-${mod_version}"
 group = mod_group_id
 
-base {
-    archivesName = mod_id
-}
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-
-    copyIdeResources = true
-    
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-			// to fix Patchouli mixin: https://github.com/VazkiiMods/Patchouli/issues/375
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-        }
-
-        client {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
-        }
-
-        gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        data {
-            workingDirectory project.file('run-data')
-
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-        }
-    }
-}
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
 repositories {
+    mavenLocal()
+
     // JEI
     maven {
         url "https://maven.blamejared.com/"
     }
-    
+
     // other CurseForge mods
     maven {
         url "https://cursemaven.com"
@@ -71,86 +26,108 @@ repositories {
     }
 }
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
-    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
-    runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
-
-    // no Forge 1.20.4
-    //implementation fg.deobf("curse.maven:the-one-probe-245211:${top_fileid}")
-    
-    implementation fg.deobf("curse.maven:jade-324717:${jade_fileid}")
-    
-    implementation fg.deobf("curse.maven:catalogue-459701:${catalogue_fileid}")
-    implementation fg.deobf("curse.maven:configured-457570:${configured_fileid}")
-
-    // no Forge 1.20.4
-    //implementation fg.deobf("curse.maven:pipez-443900:4713656")
-    implementation fg.deobf("curse.maven:largefluidtank-291006:5187514")
-    implementation fg.deobf("curse.maven:scalable-cats-force-320926:4973956")
-    implementation fg.deobf("curse.maven:biomes-o-plenty-220318:5300399")
-    implementation fg.deobf("curse.maven:terrablender-563928:5068217")
-    implementation fg.deobf("curse.maven:glitchcore-955399:5088441")
-    implementation fg.deobf("curse.maven:energized-power-782147:5401167")
+base {
+    archivesName = mod_id
 }
 
-tasks.named('processResources', ProcessResources).configure {
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+runs {
+    configureEach {
+        systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperty 'forge.logging.console.level', 'debug'
+
+        modSource project.sourceSets.main
+    }
+
+    client {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    server {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
+    }
+
+    gameTestServer {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    data {
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neo_version}"
+
+    compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+
+    implementation "curse.maven:the-one-probe-245211:${top_fileid}"
+
+    implementation "curse.maven:jade-324717:${jade_fileid}"
+
+    implementation "curse.maven:catalogue-459701:${catalogue_fileid}"
+    implementation "curse.maven:configured-457570:${configured_fileid}"
+
+    implementation "curse.maven:pipez-443900:5478845"
+    implementation "curse.maven:largefluidtank-291006:5187516"
+    implementation "curse.maven:scalable-cats-force-320926:4973960"
+    implementation "curse.maven:biomes-o-plenty-220318:5300400"
+    implementation "curse.maven:terrablender-neoforge-940057:5068223"
+    implementation "curse.maven:glitchcore-955399:5088442"
+    implementation "curse.maven:mekanism-268560:5316226"
+}
+
+tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
-            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
-            forge_version: forge_version, forge_version_range: forge_version_range,
-            loader_version_range: loader_version_range,
-            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-            mod_authors: mod_authors, mod_description: mod_description,
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
+    filesMatching(['META-INF/mods.toml']) {
+        expand replaceProperties
     }
-}
-
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_id,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-
-    finalizedBy 'reobfJar'
 }
 
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            artifact jar
+            from components.java
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            url "file://${project.projectDir}/repo"
         }
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-eclipse {
-    // Run when importing the project
-    synchronizationTasks 'genEclipseRuns'
-}
-
-sourceSets.each {
-    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
-    it.output.resourcesDir = dir
-    it.java.destinationDirectory = dir
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }

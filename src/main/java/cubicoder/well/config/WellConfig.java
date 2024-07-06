@@ -1,10 +1,6 @@
 package cubicoder.well.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -13,21 +9,24 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.fluids.FluidStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WellConfig {
 
-	public static final ForgeConfigSpec CLIENT_CONFIG = clientConfig(new ForgeConfigSpec.Builder());
-	public static final ForgeConfigSpec SERVER_CONFIG = serverConfig(new ForgeConfigSpec.Builder());
+	public static final ModConfigSpec CLIENT_CONFIG = clientConfig(new ModConfigSpec.Builder());
+	public static final ModConfigSpec SERVER_CONFIG = serverConfig(new ModConfigSpec.Builder());
 	
-	public static ForgeConfigSpec.IntValue tankCapacity;
-	public static ForgeConfigSpec.BooleanValue onlyOnePerChunk;
-	public static ForgeConfigSpec.BooleanValue playSound;
-	public static ForgeConfigSpec.ConfigValue<List<? extends String>> dataList;
+	public static ModConfigSpec.IntValue tankCapacity;
+	public static ModConfigSpec.BooleanValue onlyOnePerChunk;
+	public static ModConfigSpec.BooleanValue playSound;
+	public static ModConfigSpec.ConfigValue<List<? extends String>> dataList;
 	
 	private static final List<WellData> regularWellDataList = new ArrayList<>();
 	private static final List<WellData> upsideWellDataList = new ArrayList<>();
@@ -37,7 +36,7 @@ public class WellConfig {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG);
 	}
 
-	private static ForgeConfigSpec clientConfig(ForgeConfigSpec.Builder builder) {
+	private static ModConfigSpec clientConfig(ModConfigSpec.Builder builder) {
 		playSound = builder
 				.comment("Play the well cranking sound when someone takes fluid from a well.")
 				.translation("config.well.playSound")
@@ -45,7 +44,7 @@ public class WellConfig {
 		return builder.build();
 	}
 
-	private static ForgeConfigSpec serverConfig(ForgeConfigSpec.Builder builder) {
+	private static ModConfigSpec serverConfig(ModConfigSpec.Builder builder) {
 		tankCapacity = builder
 				.comment("How many millibuckets of a fluid can wells hold? Set to 0 to disable.")
 				.translation("config.well.tankCapacity")
