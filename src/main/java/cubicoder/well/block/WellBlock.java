@@ -203,7 +203,7 @@ public class WellBlock extends Block implements EntityBlock {
 			return InteractionResult.PASS;
 		}
 		
-		if (player.getItemInHand(hand).getCapability(Capabilities.FluidHandler.ITEM) != null) {
+		if (player.getItemInHand(hand).getCapability(Capabilities.FluidHandler.ITEM) == null) {
 			return InteractionResult.PASS;
 		}
 		

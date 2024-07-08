@@ -102,6 +102,7 @@ public class WellBlockEntity extends BlockEntity {
 		fillTick = tag.getInt("FillTick");
 		nearbyWells = Math.max(1, tag.getInt("NearbyWells"));
 		initialized = tag.getBoolean("Initialized");
+		tank.readFromNBT(tag);
 	}
 	
 	@Override
@@ -110,6 +111,7 @@ public class WellBlockEntity extends BlockEntity {
 		tag.putInt("FillTick", fillTick);
 		tag.putInt("NearbyWells", nearbyWells);
 		tag.putBoolean("Initialized", initialized);
+		tank.writeToNBT(tag);
 	}
 	
 	@Override
