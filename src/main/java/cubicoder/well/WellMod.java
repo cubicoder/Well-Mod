@@ -11,6 +11,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 @Mod(WellMod.MODID)
@@ -29,8 +31,9 @@ public final class WellMod {
 		modBus.addListener(DataGenerators::gatherData);
 		modBus.addListener(WellConfig::configChanged);
 		modBus.addListener(this::buildTabContents);
+		modBus.addListener(this::registerCapabilities);
 	}
-	
+
 	private void buildTabContents(BuildCreativeModeTabContentsEvent event) {
 		if (event.getTabKey() == CreativeModeTabs.COLORED_BLOCKS || event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
 			event.accept(ModItems.WELL);
@@ -52,5 +55,9 @@ public final class WellMod {
 			event.accept(ModItems.PINK_WELL);
 		}
 	}
-	
+
+	private void registerCapabilities(RegisterCapabilitiesEvent event) {
+		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlocks.WELL_BE.get(), (be, context) -> be.getTank());
+	}
+
 }

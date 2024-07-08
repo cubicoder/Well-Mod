@@ -25,7 +25,7 @@ public class WellBlockEntity extends BlockEntity {
 	public int nearbyWells = 1;
 	public int delayUntilNextBucket = 0; // when filling an item from the well, delay before another can be filled
 	public boolean initialized;
-	private WellFluidTank tank;
+	private WellFluidTank tank; // TODO item interaction, properly saving data
 
 	public WellBlockEntity(BlockPos pos, BlockState state) {
 		super(ModBlocks.WELL_BE.get(), pos, state);
@@ -116,7 +116,7 @@ public class WellBlockEntity extends BlockEntity {
 	public CompoundTag getUpdateTag() {
 		return saveWithoutMetadata();
 	}
-	
+
 	@Override
 	public Packet<ClientGamePacketListener> getUpdatePacket() {
 		return ClientboundBlockEntityDataPacket.create(this);
