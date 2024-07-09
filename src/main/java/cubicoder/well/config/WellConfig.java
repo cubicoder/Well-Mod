@@ -139,7 +139,7 @@ public class WellConfig {
 	
 	public static int getFillDelay(Biome biome, Level level, RandomSource random, boolean upsideDown) {
 		WellData data = getWellDataForBiome(biome, level, upsideDown);
-		return data.maxToFill == data.minToFill ? 0 : random.nextInt(data.minToFill, data.maxToFill);
+		return data.maxToFill == data.minToFill ? data.maxToFill : random.nextInt(data.minToFill, data.maxToFill);
 	}
 	
 	private static WellData getWellDataForBiome(Biome biome, Level level, boolean upsideDown) {

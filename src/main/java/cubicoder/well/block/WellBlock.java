@@ -142,15 +142,24 @@ public class WellBlock extends Block implements EntityBlock {
 	@Override
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
 		level.setBlockAndUpdate(pos.above(state.getValue(UPSIDE_DOWN) ? -1 : 1), state.setValue(HALF, DoubleBlockHalf.UPPER));
-		
-		// warn placer if only one well can function in the area
-		if (WellConfig.onlyOnePerChunk.get() && placer instanceof ServerPlayer) {
-			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof WellBlockEntity && ((WellBlockEntity) be).nearbyWells > 1) {
-				String message = state.getValue(UPSIDE_DOWN) ? "warn.well.onePerChunkFlipped" : "warn.well.onePerChunk";
-				((ServerPlayer) placer).displayClientMessage(Component.translatable(message), true);
+
+		BlockEntity be = level.getBlockEntity(pos);
+		if (be instanceof WellBlockEntity well) {
+			if (!level.isClientSide) {
+				well.initFillTick();
+				well.countNearbyWells(w -> {
+					w.nearbyWells++;
+					well.nearbyWells++;
+				});
 			}
-				
+
+			// warn placer if only one well can function in the area
+			if (WellConfig.onlyOnePerChunk.get() && placer instanceof ServerPlayer) {
+				if (well.nearbyWells > 1) {
+					String message = state.getValue(UPSIDE_DOWN) ? "warn.well.onePerChunkFlipped" : "warn.well.onePerChunk";
+					((ServerPlayer) placer).displayClientMessage(Component.translatable(message), true);
+				}
+			}
 		}
 	}
 	
@@ -190,8 +199,8 @@ public class WellBlock extends Block implements EntityBlock {
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
 		if (!state.is(newState.getBlock())) {
 			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof WellBlockEntity) {
-				((WellBlockEntity) be).countNearbyWells(e -> e.nearbyWells--);
+			if (be instanceof WellBlockEntity well) {
+				well.countNearbyWells(w -> w.nearbyWells--);
 			}
 			super.onRemove(state, level, pos, newState, isMoving);
 		}
