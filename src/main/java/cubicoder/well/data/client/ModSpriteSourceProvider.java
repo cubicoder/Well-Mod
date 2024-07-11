@@ -19,6 +19,6 @@ public class ModSpriteSourceProvider extends SpriteSourceProvider {
 
 	@Override
 	protected void gather() {
-		atlas(SpriteSourceProvider.BLOCKS_ATLAS).addSource(new SingleFile(new ResourceLocation("minecraft:entity/lead_knot"), Optional.empty()));
+		atlas(SpriteSourceProvider.BLOCKS_ATLAS).addSource(new SingleFile(ResourceLocation.parse("minecraft:entity/lead_knot"), Optional.empty()));
 	}
 }

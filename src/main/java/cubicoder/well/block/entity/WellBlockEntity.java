@@ -4,6 +4,7 @@ import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import cubicoder.well.config.WellConfig;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
@@ -83,39 +84,39 @@ public class WellBlockEntity extends BlockEntity {
 	public boolean isUpsideDown() {
 		return this.getBlockState().getValue(WellBlock.UPSIDE_DOWN);
 	}
-	
+
 	@Override
-	public void load(CompoundTag tag) {
-		super.load(tag);
+	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+		super.loadAdditional(tag, registries);
 		fillTick = tag.getInt("FillTick");
 		nearbyWells = Math.max(1, tag.getInt("NearbyWells"));
-		tank.readFromNBT(tag);
+		tank.readFromNBT(registries, tag);
 	}
-	
+
 	@Override
-	protected void saveAdditional(CompoundTag tag) {
-		super.saveAdditional(tag);
+	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+		super.saveAdditional(tag, registries);
 		tag.putInt("FillTick", fillTick);
 		tag.putInt("NearbyWells", nearbyWells);
-		tank.writeToNBT(tag);
+		tank.writeToNBT(registries, tag);
 	}
-	
+
 	@Override
-	public CompoundTag getUpdateTag() {
-		return saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+		return saveWithoutMetadata(registries);
 	}
 
 	@Override
 	public Packet<ClientGamePacketListener> getUpdatePacket() {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
-	
+
 	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
 		FluidStack oldFluid = tank.getFluid();
-		handleUpdateTag(pkt.getTag());
+		handleUpdateTag(pkt.getTag(), lookupProvider);
 		FluidStack newFluid = tank.getFluid();
-		
+
 		boolean wasEmpty = newFluid != null && oldFluid == null;
 		boolean wasFull = newFluid == null && oldFluid != null;
 

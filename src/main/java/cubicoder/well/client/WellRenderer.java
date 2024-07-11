@@ -52,15 +52,15 @@ public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 			VertexConsumer builder = bufferSource.getBuffer(RenderType.translucent());
 			Matrix4f matrix = poseStack.last().pose();
 			if (upsideDown) {
-				builder.vertex(matrix, 1 - corner, height, corner).color(color).uv(maxU, minV).uv2(packedLight).normal(0, -1, 0).endVertex();
-				builder.vertex(matrix, 1 - corner, height, 1 - corner).color(color).uv(maxU, maxV).uv2(packedLight).normal(0, -1, 0).endVertex();
-				builder.vertex(matrix, corner, height, 1 - corner).color(color).uv(minU, maxV).uv2(packedLight).normal(0, -1, 0).endVertex();
-				builder.vertex(matrix, corner, height, corner).color(color).uv(minU, minV).uv2(packedLight).normal(0, -1, 0).endVertex();
+				builder.addVertex(matrix, 1 - corner, height, corner).setColor(color).setUv(maxU, minV).setLight(packedLight).setNormal(0, -1, 0);
+				builder.addVertex(matrix, 1 - corner, height, 1 - corner).setColor(color).setUv(maxU, maxV).setLight(packedLight).setNormal(0, -1, 0);
+				builder.addVertex(matrix, corner, height, 1 - corner).setColor(color).setUv(minU, maxV).setLight(packedLight).setNormal(0, -1, 0);
+				builder.addVertex(matrix, corner, height, corner).setColor(color).setUv(minU, minV).setLight(packedLight).setNormal(0, -1, 0);
 			} else {
-				builder.vertex(matrix, corner, height, corner).color(color).uv(minU, minV).uv2(packedLight).normal(0, 1, 0).endVertex();
-				builder.vertex(matrix, corner, height, 1 - corner).color(color).uv(minU, maxV).uv2(packedLight).normal(0, 1, 0).endVertex();
-				builder.vertex(matrix, 1 - corner, height, 1 - corner).color(color).uv(maxU, maxV).uv2(packedLight).normal(0, 1, 0).endVertex();
-				builder.vertex(matrix, 1 - corner, height, corner).color(color).uv(maxU, minV).uv2(packedLight).normal(0, 1, 0).endVertex();
+				builder.addVertex(matrix, corner, height, corner).setColor(color).setUv(minU, minV).setLight(packedLight).setNormal(0, 1, 0);
+				builder.addVertex(matrix, corner, height, 1 - corner).setColor(color).setUv(minU, maxV).setLight(packedLight).setNormal(0, 1, 0);
+				builder.addVertex(matrix, 1 - corner, height, 1 - corner).setColor(color).setUv(maxU, maxV).setLight(packedLight).setNormal(0, 1, 0);
+				builder.addVertex(matrix, 1 - corner, height, corner).setColor(color).setUv(maxU, minV).setLight(packedLight).setNormal(0, 1, 0);
 			}
 			
 		}

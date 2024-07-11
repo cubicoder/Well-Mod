@@ -13,7 +13,7 @@ public class ModSounds {
 
 	public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, WellMod.MODID);
 	
-	public static final Supplier<SoundEvent> CRANK = SOUND_EVENTS.register("block.well.crank", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(WellMod.MODID, "block.well.crank")));
+	public static final Supplier<SoundEvent> CRANK = SOUND_EVENTS.register("block.well.crank", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(WellMod.MODID, "block.well.crank")));
 	
 	public static void init(IEventBus modBus) {
 		SOUND_EVENTS.register(modBus);

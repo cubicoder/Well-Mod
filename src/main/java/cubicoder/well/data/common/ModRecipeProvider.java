@@ -1,6 +1,7 @@
 package cubicoder.well.data.common;
 
 import cubicoder.well.block.ModBlocks;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.tags.TagKey;
@@ -10,10 +11,12 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.Tags;
 
+import java.util.concurrent.CompletableFuture;
+
 public class ModRecipeProvider extends RecipeProvider {
 
-	public ModRecipeProvider(PackOutput output) {
-		super(output);
+	public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> provider) {
+		super(output, provider);
 	}
 
 	@Override
@@ -22,7 +25,7 @@ public class ModRecipeProvider extends RecipeProvider {
 				.pattern("RRR")
 				.pattern("/L/")
 				.pattern("SBS")
-				.define('R', Tags.Items.INGOTS_BRICK)
+				.define('R', Tags.Items.BRICKS_NORMAL)
 				.define('/', Tags.Items.RODS_WOODEN)
 				.define('L', Items.LEAD)
 				.define('B', Items.BUCKET)

@@ -9,6 +9,7 @@ import cubicoder.well.sound.ModSounds;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -21,11 +22,11 @@ public final class WellMod {
 	public static final String MODID = "well";
 	public static final String MOD_NAME = "Well Mod";
 
-	public WellMod(IEventBus modBus) {
+	public WellMod(IEventBus modBus, ModContainer modContainer) {
 		ModBlocks.init(modBus);
 		ModItems.init(modBus);
 		ModSounds.init(modBus);
-		WellConfig.init();
+		WellConfig.init(modContainer);
 		
 		if (FMLEnvironment.dist == Dist.CLIENT) modBus.addListener(ClientEvents::registerEntityRenderers);
 		modBus.addListener(DataGenerators::gatherData);

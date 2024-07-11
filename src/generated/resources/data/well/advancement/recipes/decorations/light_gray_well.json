@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "well:light_gray_well"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_well": {
+      "conditions": {
+        "items": [
+          {
+            "items": "well:well"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_well"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "well:light_gray_well"
+    ]
+  }
+}

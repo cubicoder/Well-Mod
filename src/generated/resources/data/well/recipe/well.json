@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "/": {
+      "tag": "c:rods/wooden"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    },
+    "L": {
+      "item": "minecraft:lead"
+    },
+    "R": {
+      "tag": "c:bricks/normal"
+    },
+    "S": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "pattern": [
+    "RRR",
+    "/L/",
+    "SBS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "well:well"
+  }
+}

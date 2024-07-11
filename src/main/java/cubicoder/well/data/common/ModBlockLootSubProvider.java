@@ -3,6 +3,7 @@ package cubicoder.well.data.common;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
@@ -12,8 +13,8 @@ import java.util.Collections;
 
 public class ModBlockLootSubProvider extends BlockLootSubProvider {
 
-	public ModBlockLootSubProvider() {
-		super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags());
+	public ModBlockLootSubProvider(HolderLookup.Provider provider) {
+		super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags(), provider);
 	}
 
 	@Override

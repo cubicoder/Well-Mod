@@ -8,6 +8,6 @@ import net.minecraft.world.level.block.Block;
 
 public class ModBlockTags {
 
-	public static final TagKey<Block> WELLS = BlockTags.create(new ResourceLocation(WellMod.MODID, "wells"));
+	public static final TagKey<Block> WELLS = BlockTags.create(ResourceLocation.fromNamespaceAndPath(WellMod.MODID, "wells"));
 	
 }

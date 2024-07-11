@@ -8,6 +8,6 @@ import net.minecraft.world.item.Item;
 
 public class ModItemTags {
 
-	public static final TagKey<Item> WELLS = ItemTags.create(new ResourceLocation(WellMod.MODID, "wells"));
+	public static final TagKey<Item> WELLS = ItemTags.create(ResourceLocation.fromNamespaceAndPath(WellMod.MODID, "wells"));
 	
 }

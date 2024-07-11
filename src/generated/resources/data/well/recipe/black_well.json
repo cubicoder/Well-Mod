@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "wells",
+  "ingredients": [
+    {
+      "tag": "c:dyes/black"
+    },
+    {
+      "item": "well:well"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "well:black_well"
+  }
+}

@@ -13,7 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -205,43 +205,41 @@ public class WellBlock extends Block implements EntityBlock {
 			super.onRemove(state, level, pos, newState, isMoving);
 		}
 	}
-	
-	@Override
-	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-		if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
-			return InteractionResult.PASS;
-		}
-		
-		if (player.getItemInHand(hand).getCapability(Capabilities.FluidHandler.ITEM) == null) {
-			return InteractionResult.PASS;
-		}
-		
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		}
-		
-		BlockEntity be = level.getBlockEntity(pos);
-		if (be instanceof WellBlockEntity) {
-			WellBlockEntity well = (WellBlockEntity) be;
 
-			boolean delayFlag = true;
-			boolean fillingItem = FluidUtil.tryFillContainer(player.getItemInHand(hand), well.getTank(), Integer.MAX_VALUE, player, false).success;
-			
-			// only delay if drawing from the well with a fluid item
-			if (fillingItem) {
-				if (well.delayUntilNextBucket > 0) delayFlag = false;
-			}
-			
-			if (delayFlag && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection())) {
-				if (WellConfig.playSound.get() && fillingItem) {
-					level.playSound(null, pos.above(), ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.25F, 1);
-					well.delayUntilNextBucket = 32;
+	@Override
+	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+		if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		}
+
+		if (player.getItemInHand(hand).getCapability(Capabilities.FluidHandler.ITEM) == null) {
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		}
+
+		if (!level.isClientSide) {
+			BlockEntity be = level.getBlockEntity(pos);
+			if (be instanceof WellBlockEntity) {
+				WellBlockEntity well = (WellBlockEntity) be;
+
+				boolean delayFlag = true;
+				boolean fillingItem = FluidUtil.tryFillContainer(player.getItemInHand(hand), well.getTank(), Integer.MAX_VALUE, player, false).success;
+
+				// only delay if drawing from the well with a fluid item
+				if (fillingItem) {
+					if (well.delayUntilNextBucket > 0) delayFlag = false;
 				}
-				return InteractionResult.SUCCESS;
+
+				if (delayFlag && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hitResult.getDirection())) {
+					if (WellConfig.playSound.get() && fillingItem) {
+						level.playSound(null, pos.above(), ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.25F, 1);
+						well.delayUntilNextBucket = 32;
+					}
+					return ItemInteractionResult.SUCCESS;
+				}
 			}
 		}
-		
-		return InteractionResult.PASS;
+
+		return ItemInteractionResult.sidedSuccess(level.isClientSide);
 	}
 	
 	@Override
@@ -351,9 +349,9 @@ public class WellBlock extends Block implements EntityBlock {
 	public PushReaction getPistonPushReaction(BlockState state) {
 		return PushReaction.BLOCK;
 	}
-	
+
 	@Override
-	public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
 		return false;
 	}
 	
@@ -399,14 +397,11 @@ public class WellBlock extends Block implements EntityBlock {
 		switch (rotation) {
 		case COUNTERCLOCKWISE_90:
 		case CLOCKWISE_90:
-			switch ((Direction.Axis) state.getValue(AXIS)) {
-			case Z:
-				return state.setValue(AXIS, Direction.Axis.X);
-			case X:
-				return state.setValue(AXIS, Direction.Axis.Z);
-			default:
-				return state;
-			}
+			return switch (state.getValue(AXIS)) {
+				case Z -> state.setValue(AXIS, Direction.Axis.X);
+				case X -> state.setValue(AXIS, Direction.Axis.Z);
+				default -> state;
+			};
 		default:
 			return state;
 		}

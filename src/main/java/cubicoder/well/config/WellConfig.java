@@ -2,6 +2,7 @@ package cubicoder.well.config;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
@@ -9,7 +10,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.neoforged.fml.ModLoadingContext;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -31,9 +34,9 @@ public class WellConfig {
 	private static final List<WellData> regularWellDataList = new ArrayList<>();
 	private static final List<WellData> upsideWellDataList = new ArrayList<>();
 	
-	public static void init() {
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CLIENT_CONFIG);
-		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG);
+	public static void init(ModContainer modContainer) {
+		modContainer.registerConfig(ModConfig.Type.CLIENT, CLIENT_CONFIG);
+		modContainer.registerConfig(ModConfig.Type.SERVER, SERVER_CONFIG);
 	}
 
 	private static ModConfigSpec clientConfig(ModConfigSpec.Builder builder) {
@@ -70,13 +73,37 @@ public class WellConfig {
 			return false;
 		}
 	}
-	
+
+	// from old version of FluidStack, since they removed it
+	// seems like FluidStacks use Codecs and/or data components now, but this should work because
+	//     my use of NBT here is all internal to the config
+	public static FluidStack loadFluidStackFromNBT(CompoundTag nbt) {
+		if (nbt == null) {
+			return FluidStack.EMPTY;
+		}
+		if (!nbt.contains("FluidName", Tag.TAG_STRING)) {
+			return FluidStack.EMPTY;
+		}
+
+		ResourceLocation fluidName = ResourceLocation.parse(nbt.getString("FluidName"));
+		Fluid fluid = BuiltInRegistries.FLUID.get(fluidName);
+		if (fluid == Fluids.EMPTY) {
+			return FluidStack.EMPTY;
+		}
+		FluidStack stack = new FluidStack(fluid, nbt.getInt("Amount"));
+
+		/*if (nbt.contains("Tag", Tag.TAG_COMPOUND)) {
+			stack.tag = nbt.getCompound("Tag");
+		}*/
+		return stack;
+	}
+
 	public static void initData(String entry) {		
 		try {
 			CompoundTag data = TagParser.parseTag(entry);
 			
 			if (data.contains("Fluid", Tag.TAG_COMPOUND)) {
-				FluidStack fluid = FluidStack.loadFluidStackFromNBT(data.getCompound("Fluid"));
+				FluidStack fluid = loadFluidStackFromNBT(data.getCompound("Fluid"));
 				if (fluid == null) return;
 				
 				boolean isUpsideDown = fluid.getFluid().getFluidType().isLighterThanAir();
@@ -92,12 +119,12 @@ public class WellConfig {
 				// handle biomes
 				List<ResourceLocation> biomes = new ArrayList<>();
 				data.getList("Biomes", Tag.TAG_STRING)
-						.forEach(biomeNbt -> biomes.add(new ResourceLocation(biomeNbt.getAsString())));				
+						.forEach(biomeNbt -> biomes.add(ResourceLocation.parse(biomeNbt.getAsString())));
 				
 				// handle biome tags
 				List<ResourceLocation> biomeTags = new ArrayList<>();
 				data.getList("BiomeTags", Tag.TAG_STRING)
-						.forEach(biomeTagNbt -> biomeTags.add(new ResourceLocation(biomeTagNbt.getAsString())));
+						.forEach(biomeTagNbt -> biomeTags.add(ResourceLocation.parse(biomeTagNbt.getAsString())));
 				
 				WellData wellData;
 				if (biomes.isEmpty() && biomeTags.isEmpty()) {
