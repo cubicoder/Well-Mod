@@ -20,7 +20,7 @@ import org.joml.Matrix4f;
 
 public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 
-	public WellRenderer(BlockEntityRendererProvider.Context context) {}
+	public WellRenderer(BlockEntityRendererProvider.Context ignoredContext) {}
 	
 	@Override
 	public void render(WellBlockEntity well, float partialTick, PoseStack poseStack,
@@ -39,7 +39,12 @@ public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 
 			Level level = well.getLevel();
 			BlockPos pos = well.getBlockPos();
-			int color = fluidEx.getTintColor(fluid.getFluidType().getStateForPlacement(level, pos, fluidStack), level, pos);
+			int color;
+			if (level != null) {
+				color = fluidEx.getTintColor(fluid.getFluidType().getStateForPlacement(level, pos, fluidStack), level, pos);
+			} else {
+				color = fluidEx.getTintColor();
+			}
 
 			float corner = 3F / 16F;
 			float height = (float) WellBlock.getFluidHeight(amount, capacity, upsideDown);
