@@ -63,7 +63,7 @@ public class WellBlockEntity extends BlockEntity {
 	}
 
 	protected FluidStack getFluidToFill() {
-		return WellConfig.getFillFluid(level.getBiome(getBlockPos()).value(), level, getBlockPos(), isUpsideDown(), nearbyWells);
+		return WellConfig.getFillFluid(level.getBiome(getBlockPos()).value(), level, isUpsideDown());
 	}
 
 	public void initFillTick() {

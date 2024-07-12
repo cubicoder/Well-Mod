@@ -45,10 +45,11 @@ public class WellData {
 		Registry<Biome> reg = level.registryAccess().registryOrThrow(Registries.BIOME);
 		ResourceLocation biomeName = reg.getKey(biome);
 		
+		if (biomeName == null) return false;
+		
 		for (ResourceLocation loc : biomes) {
 			if (biomeName.equals(loc)) return true;
 		}
-		
 		
 		for (ResourceLocation tag : biomeTags) {
 			for (Holder<Biome> b : reg.getOrCreateTag(TagKey.create(Registries.BIOME, tag))) {

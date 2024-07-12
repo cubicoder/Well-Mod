@@ -1,5 +1,6 @@
 package cubicoder.well;
 
+import com.mojang.logging.LogUtils;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.client.ClientEvents;
 import cubicoder.well.config.WellConfig;
@@ -15,13 +16,15 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import org.slf4j.Logger;
 
 @Mod(WellMod.MODID)
 public final class WellMod {
 	
 	public static final String MODID = "well";
 	public static final String MOD_NAME = "Well Mod";
-
+	public static final Logger LOGGER = LogUtils.getLogger();
+	
 	public WellMod(IEventBus modBus, ModContainer modContainer) {
 		ModBlocks.init(modBus);
 		ModItems.init(modBus);
