@@ -48,6 +48,9 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 
+import javax.annotation.Nullable;
+import java.util.Objects;
+
 public class WellBlock extends Block implements EntityBlock {
 
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
@@ -88,6 +91,8 @@ public class WellBlock extends Block implements EntityBlock {
 	}
 
 	// from BaseEntityBlock
+	@Nullable
+	@SuppressWarnings("unchecked")
 	private <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> serverType, BlockEntityType<E> clientType, BlockEntityTicker<? super E> ticker) {
 		return serverType == clientType ? (BlockEntityTicker<A>) ticker : null;
 	}
@@ -106,7 +111,7 @@ public class WellBlock extends Block implements EntityBlock {
 	public BlockState getStateForPlacement(BlockPlaceContext context) {
 		Level level = context.getLevel();
 		BlockPos pos = context.getClickedPos();
-		Direction.Axis axis = context.getPlayer().isCrouching() ? context.getHorizontalDirection().getClockWise().getAxis()
+		Direction.Axis axis = Objects.requireNonNull(context.getPlayer()).isCrouching() ? context.getHorizontalDirection().getClockWise().getAxis()
 				: context.getHorizontalDirection().getAxis();
 		
 		// regular placement
@@ -140,7 +145,7 @@ public class WellBlock extends Block implements EntityBlock {
 	}
 	
 	@Override
-	public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
 		level.setBlockAndUpdate(pos.above(state.getValue(UPSIDE_DOWN) ? -1 : 1), state.setValue(HALF, DoubleBlockHalf.UPPER));
 
 		BlockEntity be = level.getBlockEntity(pos);
@@ -163,7 +168,6 @@ public class WellBlock extends Block implements EntityBlock {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
@@ -194,7 +198,6 @@ public class WellBlock extends Block implements EntityBlock {
 		return super.playerWillDestroy(level, pos, state, player);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
 		if (!state.is(newState.getBlock())) {
@@ -218,9 +221,7 @@ public class WellBlock extends Block implements EntityBlock {
 
 		if (!level.isClientSide) {
 			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof WellBlockEntity) {
-				WellBlockEntity well = (WellBlockEntity) be;
-
+			if (be instanceof WellBlockEntity well) {
 				boolean delayFlag = true;
 				boolean fillingItem = FluidUtil.tryFillContainer(player.getItemInHand(hand), well.getTank(), Integer.MAX_VALUE, player, false).success;
 
@@ -244,15 +245,17 @@ public class WellBlock extends Block implements EntityBlock {
 	
 	@Override
 	public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+		// TODO see implementation details, we're missing some stuff here
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
 			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof WellBlockEntity) {
-				FluidStack fluidStack = ((WellBlockEntity) be).getTank().getFluid();
-				if (fluidStack != null && !fluidStack.isEmpty()) {
+			if (be instanceof WellBlockEntity well) {
+				FluidStack fluidStack = well.getTank().getFluid();
+				if (!fluidStack.isEmpty()) {
 					Fluid fluid = fluidStack.getFluid();
-					int baseFluidLight = fluid.getFluidType().getLightLevel(fluid.defaultFluidState(), be.getLevel(), pos);
+					FluidType fluidType = fluid.getFluidType();
+					int baseFluidLight = well.getLevel() != null ? fluidType.getLightLevel(fluid.defaultFluidState(), well.getLevel(), pos) : fluidType.getLightLevel();
 					if (baseFluidLight > 0) {
-						return Mth.clamp((int) (baseFluidLight * fluidStack.getAmount() / WellConfig.tankCapacity.get() + 0.5), 1, 15);
+						return Mth.clamp(((baseFluidLight - 1) * fluidStack.getAmount() / WellConfig.tankCapacity.get()) + 1, 1, 15);
 					}
 				}
 			}
@@ -265,53 +268,47 @@ public class WellBlock extends Block implements EntityBlock {
 	public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
 			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof WellBlockEntity) {
-				WellBlockEntity well = (WellBlockEntity) be;
+			if (be instanceof WellBlockEntity well) {
 				FluidStack fluid = well.getTank().getFluid();
 				
-				if (fluid != null) {
-					int amount = well.getTank().getFluidAmount();
-					int capacity = well.getTank().getCapacity();
-					boolean upsideDown = state.getValue(UPSIDE_DOWN);
-					FluidType fluidType = fluid.getFluid().getFluidType();
-					
-					if (!upsideDown) {
-						if (entity.getY() < (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
-							// hardcoded behavior for lava based on cauldron
-							if (fluidType == NeoForgeMod.LAVA_TYPE) {
-								entity.lavaHurt();
-							}
-							
-							// should apply universally, not just for water
-							if (fluidType.canExtinguish(entity)) {
-								if (!level.isClientSide && entity.isOnFire()) {
-									entity.clearFire();
-								}
-							}
+				if (!fluid.isEmpty()) {
+					if (isInFluid(entity.getY(), pos.getY(), well)) {
+						FluidType fluidType = fluid.getFluid().getFluidType();
+
+						// hardcoded behavior for lava based on cauldron
+						if (fluidType == NeoForgeMod.LAVA_TYPE) {
+							entity.lavaHurt();
 						}
-					} else {
-						if (entity.getY() > (double) pos.getY() + getFluidRenderHeight(amount, capacity, upsideDown)) {
-							// no behavior for upside down fluids (yet?)
+
+						// extinguish fire if possible
+						if (fluidType.canExtinguish(entity)) {
+							if (entity.isOnFire()) {
+								entity.extinguishFire();
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-	
+
+	private boolean isInFluid(double entityY, int blockY, WellBlockEntity well) {
+		double fluidHeight = getFluidHeight(well.getTank().getFluidAmount(), well.getTank().getCapacity(), well.isUpsideDown());
+		return well.isUpsideDown() ? entityY > blockY + fluidHeight : entityY < blockY + fluidHeight;
+	}
+
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
 			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof WellBlockEntity) {
-				WellBlockEntity well = (WellBlockEntity) be;
+			if (be instanceof WellBlockEntity well) {
 				FluidStack fluid = well.getTank().getFluid();
 				
-				if (fluid != null) {
+				if (!fluid.isEmpty()) {
 					int amount = well.getTank().getFluidAmount();
 					int capacity = well.getTank().getCapacity();
 					boolean upsideDown = state.getValue(UPSIDE_DOWN);
-					float height = getFluidRenderHeight(amount, capacity, upsideDown);
+					double height = getFluidHeight(amount, capacity, upsideDown);
 					FluidState fluidState = fluid.getFluid().defaultFluidState();
 					fluidState.animateTick(level, pos, random);
 
@@ -340,7 +337,7 @@ public class WellBlock extends Block implements EntityBlock {
 	}
 	
 	@Override
-	public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, Entity entity) {
+	public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, @Nullable Entity entity) {
 		// improve the roof sound if possible (some mods change the sound type of bricks to be better)
 		return state.getValue(HALF) == DoubleBlockHalf.UPPER ? this.soundType : Blocks.BRICKS.getSoundType(state, level, pos, entity);
 	}
@@ -354,7 +351,8 @@ public class WellBlock extends Block implements EntityBlock {
 	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
 		return false;
 	}
-	
+
+	@SuppressWarnings("deprecation")
 	@Override
 	public RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
@@ -392,19 +390,17 @@ public class WellBlock extends Block implements EntityBlock {
 		} else return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public BlockState rotate(BlockState state, Rotation rotation) {
-		switch (rotation) {
-		case COUNTERCLOCKWISE_90:
-		case CLOCKWISE_90:
-			return switch (state.getValue(AXIS)) {
+		return switch (rotation) {
+			case COUNTERCLOCKWISE_90, CLOCKWISE_90 -> switch (state.getValue(AXIS)) {
 				case Z -> state.setValue(AXIS, Direction.Axis.X);
 				case X -> state.setValue(AXIS, Direction.Axis.Z);
 				default -> state;
 			};
-		default:
-			return state;
-		}
+			default -> state;
+		};
 	}
 	
 	/**
@@ -414,9 +410,7 @@ public class WellBlock extends Block implements EntityBlock {
 	 */
 	public static VoxelShape flipShapeXZ(VoxelShape shape) {
 		VoxelShape[] buffer = new VoxelShape[] { shape, Shapes.empty() };
-		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-			buffer[1] = Shapes.or(buffer[1], Shapes.create(minZ, minY, minX, maxZ, maxY, maxX));
-		});
+		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1], Shapes.create(minZ, minY, minX, maxZ, maxY, maxX)));
 		
 		return buffer[1];
 	}
@@ -428,15 +422,13 @@ public class WellBlock extends Block implements EntityBlock {
 	 */
 	public static VoxelShape flipShapeUpsideDown(VoxelShape shape) {
 		VoxelShape[] buffer = new VoxelShape[] { shape, Shapes.empty() };
-		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-			buffer[1] = Shapes.or(buffer[1], Shapes.create(minX, 1 - maxY, minZ, maxX, 1 - minY, maxZ));
-		});
+		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1], Shapes.create(minX, 1 - maxY, minZ, maxX, 1 - minY, maxZ)));
 		
 		return buffer[1];
 	}
-	
-	public static float getFluidRenderHeight(int amount, int capacity, boolean upsideDown) {
-		float height = amount * 14F / (16 * capacity) + (2F / 16);
+
+	public static double getFluidHeight(int amount, int capacity, boolean upsideDown) {
+		double height = amount * 14F / (16 * capacity) + (2F / 16);
 		return upsideDown ? 1 - height : height;
 	}
 

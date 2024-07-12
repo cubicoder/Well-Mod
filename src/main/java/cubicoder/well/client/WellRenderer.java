@@ -42,7 +42,7 @@ public class WellRenderer implements BlockEntityRenderer<WellBlockEntity> {
 			int color = fluidEx.getTintColor(fluid.getFluidType().getStateForPlacement(level, pos, fluidStack), level, pos);
 
 			float corner = 3F / 16F;
-			float height = WellBlock.getFluidRenderHeight(amount, capacity, upsideDown);
+			float height = (float) WellBlock.getFluidHeight(amount, capacity, upsideDown);
 
 			float minU = sprite.getU(3F / 16F);
 			float maxU = sprite.getU(13F / 16F);
