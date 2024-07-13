@@ -24,14 +24,23 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
-import net.minecraft.world.level.block.state.properties.*;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -49,7 +58,6 @@ import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public class WellBlock extends Block implements EntityBlock {
 
@@ -111,8 +119,10 @@ public class WellBlock extends Block implements EntityBlock {
 	public BlockState getStateForPlacement(BlockPlaceContext context) {
 		Level level = context.getLevel();
 		BlockPos pos = context.getClickedPos();
-		Direction.Axis axis = Objects.requireNonNull(context.getPlayer()).isCrouching() ? context.getHorizontalDirection().getClockWise().getAxis()
-				: context.getHorizontalDirection().getAxis();
+		Direction.Axis axis = context.getHorizontalDirection().getAxis();
+		if (context.getPlayer() != null && context.getPlayer().isCrouching()) {
+			axis = context.getHorizontalDirection().getClockWise().getAxis();
+		}
 		
 		// regular placement
 		if (pos.getY() < level.getMaxBuildHeight() - 1) {
