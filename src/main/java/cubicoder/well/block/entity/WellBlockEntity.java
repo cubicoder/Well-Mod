@@ -10,11 +10,14 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
@@ -54,9 +57,7 @@ public class WellBlockEntity extends BlockEntity {
 
 	@Override
 	public void onLoad() {
-		if (tank.updateLight(tank.getFluid()) && level != null) {
-			level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
-		}
+		tank.updateLight();
 	}
 
 	protected FluidStack getFluidToFill() {
@@ -113,20 +114,11 @@ public class WellBlockEntity extends BlockEntity {
 	public Packet<ClientGamePacketListener> getUpdatePacket() {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
-
+	
 	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
-		FluidStack oldFluid = tank.getFluid();
-		handleUpdateTag(pkt.getTag(), lookupProvider);
-		FluidStack newFluid = tank.getFluid();
-
-		// update renderer and light level if needed
-		if (newFluid.getAmount() != oldFluid.getAmount() || !FluidStack.isSameFluidSameComponents(newFluid, oldFluid)) {
-			if (!newFluid.isEmpty()) {
-				tank.updateLight(newFluid);
-			} else tank.updateLight(oldFluid);
-			if (level != null) level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
-		}
+		super.onDataPacket(net, pkt, lookupProvider);
+		tank.updateLight();
 	}
 	
 	public FluidTank getTank() {
@@ -158,20 +150,30 @@ public class WellBlockEntity extends BlockEntity {
 			return well.getFluidToFill().getFluid() == resource.getFluid() ? super.fill(resource, action) : 0;
 		}
 		
-		protected boolean updateLight(FluidStack resource) {
-			if (well.getLevel() != null &&
-					resource.getFluid().getFluidType().getLightLevel(resource.getFluid().defaultFluidState(),
-					well.getLevel(), well.getBlockPos()) > 0) {
-				well.getLevel().getLightEngine().checkBlock(well.getBlockPos());
-				return true;
+		protected void updateLight() {
+			if (well.getLevel() != null) {
+				Level level = well.getLevel();
+				BlockPos pos = well.getBlockPos();
+				AuxiliaryLightManager lightManager = level.getAuxLightManager(pos);
+				if (lightManager != null) {
+					if (isEmpty()) {
+						lightManager.removeLightAt(pos);
+					} else {
+						FluidType fluidType = fluid.getFluidType();
+						int fluidLight = fluidType.getLightLevel(fluidType.getStateForPlacement(level, pos, fluid), level, pos);
+						lightManager.setLightAt(pos, Mth.clamp(((fluidLight - 1) * fluid.getAmount() / WellConfig.tankCapacity.get()) + 1, 1, level.getMaxLightLevel()));
+					}
+				}
 			}
-			return false;
 		}
 		
 		@Override
 		protected void onContentsChanged() {
-			if (well.getLevel() != null) well.getLevel().sendBlockUpdated(well.getBlockPos(), well.getBlockState(), well.getBlockState(), Block.UPDATE_ALL);
-			updateLight(fluid);
+			well.setChanged();
+			updateLight();
+			if (well.getLevel() != null) {
+				well.getLevel().sendBlockUpdated(well.getBlockPos(), well.getBlockState(), well.getBlockState(), Block.UPDATE_ALL);
+			}
 		}
 		
 	}

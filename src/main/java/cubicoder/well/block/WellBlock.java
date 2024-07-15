@@ -10,7 +10,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
@@ -41,7 +40,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
@@ -53,6 +51,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
@@ -180,11 +179,10 @@ public class WellBlock extends Block implements EntityBlock {
 	
 	@Override
 	public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
+		if (state.getBlock() != this || state.getValue(HALF) == DoubleBlockHalf.LOWER) {
 			return super.canSurvive(state, level, pos);
 		} else {
 			BlockState base = level.getBlockState(pos.below(state.getValue(UPSIDE_DOWN) ? -1 : 1));
-			if (state.getBlock() != this) return super.canSurvive(state, level, pos);
 			return base.is(this) && base.getValue(HALF) == DoubleBlockHalf.LOWER;
 		}
 	}
@@ -254,24 +252,18 @@ public class WellBlock extends Block implements EntityBlock {
 	}
 	
 	@Override
+	public boolean hasDynamicLightEmission(BlockState state) {
+		return state.getValue(HALF) == DoubleBlockHalf.LOWER;
+	}
+	
+	@Override
 	public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
-		// TODO see implementation details, we're missing some stuff here
-		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
-			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof WellBlockEntity well) {
-				FluidStack fluidStack = well.getTank().getFluid();
-				if (!fluidStack.isEmpty()) {
-					Fluid fluid = fluidStack.getFluid();
-					FluidType fluidType = fluid.getFluidType();
-					int baseFluidLight = well.getLevel() != null ? fluidType.getLightLevel(fluid.defaultFluidState(), well.getLevel(), pos) : fluidType.getLightLevel();
-					if (baseFluidLight > 0) {
-						return Mth.clamp(((baseFluidLight - 1) * fluidStack.getAmount() / WellConfig.tankCapacity.get()) + 1, 1, 15);
-					}
-				}
-			}
+		AuxiliaryLightManager lightManager = level.getAuxLightManager(pos);
+		if (lightManager != null) {
+			return lightManager.getLightAt(pos);
+		} else {
+			return 0;
 		}
-		
-		return 0;
 	}
 	
 	@Override
