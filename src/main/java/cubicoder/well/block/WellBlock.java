@@ -1,5 +1,6 @@
 package cubicoder.well.block;
 
+import com.mojang.serialization.MapCodec;
 import cubicoder.well.block.entity.WellBlockEntity;
 import cubicoder.well.config.WellConfig;
 import cubicoder.well.sound.ModSounds;
@@ -59,7 +60,7 @@ import net.neoforged.neoforge.fluids.FluidUtil;
 import javax.annotation.Nullable;
 
 public class WellBlock extends Block implements EntityBlock {
-
+	
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 	public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
 	public static final BooleanProperty UPSIDE_DOWN = BooleanProperty.create("upside_down");
@@ -80,9 +81,11 @@ public class WellBlock extends Block implements EntityBlock {
 			SHAPE_INNER_SUPPORT
 	);
 	
-	public WellBlock(DyeColor mapColor) {
+	private DyeColor color;
+	
+	public WellBlock(DyeColor color) {
 		super(BlockBehaviour.Properties.of()
-				.mapColor(mapColor)
+				.mapColor(color)
 				.instrument(NoteBlockInstrument.BASEDRUM)
 				.strength(1.5F, 6.0F)
 				.requiresCorrectToolForDrops());
@@ -90,20 +93,30 @@ public class WellBlock extends Block implements EntityBlock {
 				.setValue(AXIS, Direction.Axis.X)
 				.setValue(HALF, DoubleBlockHalf.LOWER)
 				.setValue(UPSIDE_DOWN, false));
+		this.color = color;
 	}
-
+	
+	public DyeColor getColor() {
+		return color;
+	}
+	
+	@Override
+	protected MapCodec<? extends Block> codec() {
+		return ModBlocks.WELL_CODEC.value();
+	}
+	
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return state.getValue(HALF) == DoubleBlockHalf.LOWER ? new WellBlockEntity(pos, state) : null;
 	}
-
+	
 	// from BaseEntityBlock
 	@Nullable
 	@SuppressWarnings("unchecked")
 	private <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> serverType, BlockEntityType<E> clientType, BlockEntityTicker<? super E> ticker) {
 		return serverType == clientType ? (BlockEntityTicker<A>) ticker : null;
 	}
-
+	
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
 		return level.isClientSide ? null : createTickerHelper(type, ModBlocks.WELL_BE.get(), WellBlockEntity::serverTick);
@@ -156,7 +169,7 @@ public class WellBlock extends Block implements EntityBlock {
 	@Override
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
 		level.setBlockAndUpdate(pos.above(state.getValue(UPSIDE_DOWN) ? -1 : 1), state.setValue(HALF, DoubleBlockHalf.UPPER));
-
+		
 		BlockEntity be = level.getBlockEntity(pos);
 		if (be instanceof WellBlockEntity well) {
 			if (!level.isClientSide) {
@@ -166,7 +179,7 @@ public class WellBlock extends Block implements EntityBlock {
 					well.nearbyWells++;
 				});
 			}
-
+			
 			// warn placer if only one well can function in the area
 			if (WellConfig.onlyOnePerChunk.get() && placer instanceof ServerPlayer) {
 				if (well.nearbyWells > 1) {
@@ -202,10 +215,10 @@ public class WellBlock extends Block implements EntityBlock {
 				}
 			}
 		}
-
+		
 		return super.playerWillDestroy(level, pos, state, player);
 	}
-
+	
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
 		if (!state.is(newState.getBlock())) {
@@ -216,28 +229,28 @@ public class WellBlock extends Block implements EntityBlock {
 			super.onRemove(state, level, pos, newState, isMoving);
 		}
 	}
-
+	
 	@Override
 	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
 		if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
 			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		}
-
+		
 		if (player.getItemInHand(hand).getCapability(Capabilities.FluidHandler.ITEM) == null) {
 			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		}
-
+		
 		if (!level.isClientSide) {
 			BlockEntity be = level.getBlockEntity(pos);
 			if (be instanceof WellBlockEntity well) {
 				boolean delayFlag = true;
 				boolean fillingItem = FluidUtil.tryFillContainer(player.getItemInHand(hand), well.getTank(), Integer.MAX_VALUE, player, false).success;
-
+				
 				// only delay if drawing from the well with a fluid item
 				if (fillingItem) {
 					if (well.delayUntilNextBucket > 0) delayFlag = false;
 				}
-
+				
 				if (delayFlag && FluidUtil.interactWithFluidHandler(player, hand, level, pos, hitResult.getDirection())) {
 					if (WellConfig.playSound.get() && fillingItem) {
 						level.playSound(null, pos.above(), ModSounds.CRANK.get(), SoundSource.BLOCKS, 0.25F, 1);
@@ -247,7 +260,7 @@ public class WellBlock extends Block implements EntityBlock {
 				}
 			}
 		}
-
+		
 		return ItemInteractionResult.sidedSuccess(level.isClientSide);
 	}
 	
@@ -276,12 +289,12 @@ public class WellBlock extends Block implements EntityBlock {
 				if (!fluid.isEmpty()) {
 					if (isInFluid(entity.getY(), pos.getY(), well)) {
 						FluidType fluidType = fluid.getFluid().getFluidType();
-
+						
 						// hardcoded behavior for lava based on cauldron
 						if (fluidType == NeoForgeMod.LAVA_TYPE) {
 							entity.lavaHurt();
 						}
-
+						
 						// extinguish fire if possible
 						if (fluidType.canExtinguish(entity)) {
 							if (entity.isOnFire()) {
@@ -293,12 +306,12 @@ public class WellBlock extends Block implements EntityBlock {
 			}
 		}
 	}
-
+	
 	private boolean isInFluid(double entityY, int blockY, WellBlockEntity well) {
 		double fluidHeight = getFluidHeight(well.getTank().getFluidAmount(), well.getTank().getCapacity(), well.isUpsideDown());
 		return well.isUpsideDown() ? entityY > blockY + fluidHeight : entityY < blockY + fluidHeight;
 	}
-
+	
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
@@ -313,7 +326,7 @@ public class WellBlock extends Block implements EntityBlock {
 					double height = getFluidHeight(amount, capacity, upsideDown);
 					FluidState fluidState = fluid.getFluid().defaultFluidState();
 					fluidState.animateTick(level, pos, random);
-
+					
 					// get around lava particle check
 					if (fluid.getFluid() == Fluids.LAVA) {
 						if (random.nextInt(100) == 0) {
@@ -324,7 +337,7 @@ public class WellBlock extends Block implements EntityBlock {
 							level.playLocalSound(x, y, z, SoundEvents.LAVA_POP, SoundSource.BLOCKS,
 									0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
 						}
-
+						
 						if (random.nextInt(200) == 0) {
 							double x = (double) pos.getX() + 0.5;
 							double y = (double) pos.getY() + height / 2;
@@ -343,17 +356,17 @@ public class WellBlock extends Block implements EntityBlock {
 		// improve the roof sound if possible (some mods change the sound type of bricks to be better)
 		return state.getValue(HALF) == DoubleBlockHalf.UPPER ? this.soundType : Blocks.BRICKS.getSoundType(state, level, pos, entity);
 	}
-		
+	
 	@Override
 	public PushReaction getPistonPushReaction(BlockState state) {
 		return PushReaction.BLOCK;
 	}
-
+	
 	@Override
 	protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
 		return false;
 	}
-
+	
 	@SuppressWarnings("deprecation")
 	@Override
 	public RenderShape getRenderShape(BlockState state) {
@@ -366,7 +379,9 @@ public class WellBlock extends Block implements EntityBlock {
 			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_BASE) : SHAPE_BASE;
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
 			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_ROOF) : SHAPE_ROOF;
-		} else return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
+		} else {
+			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
+		}
 	}
 	
 	@Override
@@ -375,7 +390,9 @@ public class WellBlock extends Block implements EntityBlock {
 			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_BASE) : SHAPE_BASE;
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
 			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_INNER_SUPPORT) : SHAPE_INNER_SUPPORT;
-		} else return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_INNER_SUPPORT)) : flipShapeXZ(SHAPE_INNER_SUPPORT);
+		} else {
+			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_INNER_SUPPORT)) : flipShapeXZ(SHAPE_INNER_SUPPORT);
+		}
 	}
 	
 	@Override
@@ -389,9 +406,11 @@ public class WellBlock extends Block implements EntityBlock {
 			return Shapes.block();
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
 			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_ROOF) : SHAPE_ROOF;
-		} else return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
+		} else {
+			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
+		}
 	}
-
+	
 	@SuppressWarnings("deprecation")
 	@Override
 	public BlockState rotate(BlockState state, Rotation rotation) {
@@ -407,11 +426,12 @@ public class WellBlock extends Block implements EntityBlock {
 	
 	/**
 	 * Flips the VoxelShape from the X axis to the Z axis, or vice versa.
+	 *
 	 * @param shape the shape to be flipped
 	 * @return the flipped VoxelShape
 	 */
 	public static VoxelShape flipShapeXZ(VoxelShape shape) {
-		VoxelShape[] buffer = new VoxelShape[] { shape, Shapes.empty() };
+		VoxelShape[] buffer = new VoxelShape[]{ shape, Shapes.empty() };
 		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1], Shapes.create(minZ, minY, minX, maxZ, maxY, maxX)));
 		
 		return buffer[1];
@@ -419,19 +439,20 @@ public class WellBlock extends Block implements EntityBlock {
 	
 	/**
 	 * Flips the VoxelShape upside down.
+	 *
 	 * @param shape the shape to be flipped
 	 * @return the flipped VoxelShape
 	 */
 	public static VoxelShape flipShapeUpsideDown(VoxelShape shape) {
-		VoxelShape[] buffer = new VoxelShape[] { shape, Shapes.empty() };
+		VoxelShape[] buffer = new VoxelShape[]{ shape, Shapes.empty() };
 		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1], Shapes.create(minX, 1 - maxY, minZ, maxX, 1 - minY, maxZ)));
 		
 		return buffer[1];
 	}
-
+	
 	public static double getFluidHeight(int amount, int capacity, boolean upsideDown) {
 		double height = amount * 14F / (16 * capacity) + (2F / 16);
 		return upsideDown ? 1 - height : height;
 	}
-
+	
 }
