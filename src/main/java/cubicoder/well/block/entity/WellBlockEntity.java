@@ -3,6 +3,9 @@ package cubicoder.well.block.entity;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.block.WellBlock;
 import cubicoder.well.config.WellConfig;
+import cubicoder.well.recipe.WellRecipe;
+import cubicoder.well.recipe.WellRecipeInput;
+import cubicoder.well.recipe.WellRecipeRegistration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +14,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -21,7 +26,10 @@ import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class WellBlockEntity extends BlockEntity {
 
@@ -45,7 +53,7 @@ public class WellBlockEntity extends BlockEntity {
 			well.setChanged();
 		}
 		
-		if (well.fillTick <= 0 && WellConfig.canGenerateFluid(well.nearbyWells)) {
+		if (well.fillTick <= 0 && (well.nearbyWells == 1 || !WellConfig.onlyOnePerChunk.get())) {
 			FluidStack fluidToFill = well.getFluidToFill();
 			int result = well.tank.fill(fluidToFill, IFluidHandler.FluidAction.EXECUTE);
 			if (result > 0) {
@@ -60,15 +68,38 @@ public class WellBlockEntity extends BlockEntity {
 		tank.updateLight();
 	}
 
-	protected FluidStack getFluidToFill() {
+	private @Nullable WellRecipe getRecipe(WellRecipeInput input) {
 		if (level != null) {
-			return WellConfig.getFillFluid(level.getBiome(getBlockPos()).value(), level, isUpsideDown());
-		} else return FluidStack.EMPTY;
+			RecipeManager recipes = level.getRecipeManager();
+			Predicate<RecipeHolder<WellRecipe>> fluidLighterThanAir = r -> isUpsideDown() == r.value().getResultFluid(level.registryAccess()).getFluid().getFluidType().isLighterThanAir();
+			List<RecipeHolder<WellRecipe>> list = recipes.getRecipesFor(WellRecipeRegistration.WELL_RECIPE_TYPE.get(), input, level).stream().filter(fluidLighterThanAir).toList();
+			if (!list.isEmpty()) {
+				return list.getFirst().value();
+			}
+		}
+		
+		return null;
+	}
+	
+	protected FluidStack getFluidToFill() {
+		if (level != null && !level.isClientSide) {
+			WellRecipeInput input = new WellRecipeInput(level.getBiome(getBlockPos()));
+			WellRecipe recipe = getRecipe(input);
+			if (recipe != null) {
+				return recipe.assembleFluid(input, level.registryAccess());
+			}
+		}
+		
+		return FluidStack.EMPTY;
 	}
 
 	public void initFillTick() {
-		if (level != null) {
-			fillTick = WellConfig.getFillDelay(level.getBiome(getBlockPos()).value(), level, level.random, isUpsideDown());
+		if (level != null && !level.isClientSide) {
+			WellRecipeInput input = new WellRecipeInput(level.getBiome(getBlockPos()));
+			WellRecipe recipe = getRecipe(input);
+			if (recipe != null) {
+				fillTick = recipe.maxTicks() == recipe.minTicks() ? recipe.maxTicks() : level.random.nextInt(recipe.minTicks(), recipe.maxTicks());
+			}
 		}
 	}
 	

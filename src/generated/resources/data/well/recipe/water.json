@@ -1,0 +1,13 @@
+{
+  "type": "well:well",
+  "biomeTags": [
+    "c:is_overworld"
+  ],
+  "biomes": [],
+  "maxTicks": 200,
+  "minTicks": 160,
+  "result": {
+    "amount": 1000,
+    "id": "minecraft:water"
+  }
+}

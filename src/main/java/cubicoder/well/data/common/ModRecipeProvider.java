@@ -1,6 +1,7 @@
 package cubicoder.well.data.common;
 
 import cubicoder.well.block.ModBlocks;
+import cubicoder.well.recipe.WellRecipeBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -13,8 +14,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.fluids.FluidStack;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ModRecipeProvider extends RecipeProvider {
@@ -53,6 +57,9 @@ public class ModRecipeProvider extends RecipeProvider {
 		dyedWell(recipeOutput, ModBlocks.GREEN_WELL.get(), Tags.Items.DYES_GREEN);
 		dyedWell(recipeOutput, ModBlocks.RED_WELL.get(), Tags.Items.DYES_RED);
 		dyedWell(recipeOutput, ModBlocks.BLACK_WELL.get(), Tags.Items.DYES_BLACK);
+		
+		new WellRecipeBuilder(List.of(), List.of(Tags.Biomes.IS_OVERWORLD), 160, 200, new FluidStack(Fluids.WATER, 1000)).save(recipeOutput);
+		new WellRecipeBuilder(List.of(), List.of(Tags.Biomes.IS_NETHER), 160, 200, new FluidStack(Fluids.LAVA, 1000)).save(recipeOutput);
 	}
 	
 	private void dyedWell(RecipeOutput recipeOutput, ItemLike dyedWell, TagKey<Item> dye) {

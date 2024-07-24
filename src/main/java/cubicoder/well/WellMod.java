@@ -1,11 +1,11 @@
 package cubicoder.well;
 
-import com.mojang.logging.LogUtils;
 import cubicoder.well.block.ModBlocks;
 import cubicoder.well.client.ClientEvents;
 import cubicoder.well.config.WellConfig;
 import cubicoder.well.data.DataGenerators;
 import cubicoder.well.item.ModItems;
+import cubicoder.well.recipe.WellRecipeRegistration;
 import cubicoder.well.sound.ModSounds;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.api.distmarker.Dist;
@@ -16,24 +16,22 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import org.slf4j.Logger;
 
 @Mod(WellMod.MODID)
 public final class WellMod {
 	
 	public static final String MODID = "well";
 	public static final String MOD_NAME = "Well Mod";
-	public static final Logger LOGGER = LogUtils.getLogger();
 	
 	public WellMod(IEventBus modBus, ModContainer modContainer) {
 		ModBlocks.init(modBus);
 		ModItems.init(modBus);
 		ModSounds.init(modBus);
+		WellRecipeRegistration.init(modBus);
 		WellConfig.init(modContainer);
 		
 		if (FMLEnvironment.dist == Dist.CLIENT) modBus.addListener(ClientEvents::registerEntityRenderers);
 		modBus.addListener(DataGenerators::gatherData);
-		modBus.addListener(WellConfig::configChanged);
 		modBus.addListener(this::buildTabContents);
 		modBus.addListener(this::registerCapabilities);
 	}
