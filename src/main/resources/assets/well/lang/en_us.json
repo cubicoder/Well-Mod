@@ -28,5 +28,11 @@
     
     "subtitle.block.well.crank": "Well crank squeaks",
     "warn.well.onePerChunk": "Already one other right side up well in the same chunk as this one!",
-    "warn.well.onePerChunkFlipped": "Already one other upside down well in the same chunk as this one!"
+    "warn.well.onePerChunkFlipped": "Already one other upside down well in the same chunk as this one!",
+
+    "gui.well.category.well": "Well Generation",
+
+    "well.tooltip.generation": "Generates fluid in:",
+    "well.tooltip.time": "Takes %s ticks",
+    "well.tooltip.time.range": "Takes %s-%s ticks"
 }

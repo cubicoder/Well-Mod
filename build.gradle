@@ -89,6 +89,7 @@ dependencies {
     implementation "curse.maven:terrablender-neoforge-940057:5429865"
     implementation "curse.maven:glitchcore-955399:5483773"
     implementation "curse.maven:mekanism-268560:5516546"
+    implementation "curse.maven:just-dire-things-1002348:5549188"
 }
 
 tasks.withType(ProcessResources).configureEach {
