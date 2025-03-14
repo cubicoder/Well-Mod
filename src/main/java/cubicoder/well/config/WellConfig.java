@@ -23,6 +23,10 @@ public class WellConfig {
 			.comment("When set to true, all wells in the chunk will stop working while there's more than 1.")
 			.translation("config.well.onlyOnePerChunk")
 			.define("onlyOnePerChunk", false);
+	public static ModConfigSpec.BooleanValue allowWellFill = SERVER_BUILDER
+			.comment("When set to true, wells can be filled by buckets and pipes. Otherwise, wells can only be extracted from.")
+			.translation("config.well.allowWellFill")
+			.define("allowWellFill", false);
 	
 	private WellConfig() {}
 	

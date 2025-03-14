@@ -7,6 +7,8 @@
     "config.well.playSound.tooltip": "Play the well cranking sound when someone takes fluid from a well.",
     "config.well.tankCapacity": "Fluid Tank Capacity",
     "config.well.tankCapacity.tooltip": "How many millibuckets of a fluid can wells hold? Set to 0 to disable.",
+    "config.well.allowWellFill": "Allow Well Fill",
+    "config.well.allowWellFill.tooltip": "When set to true, wells can be filled by buckets and pipes. Otherwise, wells can only be extracted from.",
     
     "block.well.black_well": "Black Well",
     "block.well.blue_well": "Blue Well",

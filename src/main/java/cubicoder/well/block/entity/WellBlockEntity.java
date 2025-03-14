@@ -55,7 +55,9 @@ public class WellBlockEntity extends BlockEntity {
 		
 		if (well.fillTick <= 0 && (well.nearbyWells == 1 || !WellConfig.onlyOnePerChunk.get())) {
 			FluidStack fluidToFill = well.getFluidToFill();
+			well.tank.allowFill = true;
 			int result = well.tank.fill(fluidToFill, IFluidHandler.FluidAction.EXECUTE);
+			well.tank.allowFill = false;
 			if (result > 0) {
 				well.initFillTick();
 				well.setChanged();
@@ -159,6 +161,7 @@ public class WellBlockEntity extends BlockEntity {
 	public static class WellFluidTank extends FluidTank {
 
 		private final WellBlockEntity well;
+		protected boolean allowFill = false;
 		
 		public WellFluidTank(WellBlockEntity well, int capacity) {
 			super(capacity);
@@ -178,7 +181,11 @@ public class WellBlockEntity extends BlockEntity {
 		
 		@Override
 		public int fill(FluidStack resource, IFluidHandler.FluidAction action) {
-			return well.getFluidToFill().getFluid() == resource.getFluid() ? super.fill(resource, action) : 0;
+			if (WellConfig.allowWellFill.get() || allowFill) {
+				return well.getFluidToFill().getFluid() == resource.getFluid() ? super.fill(resource, action) : 0;
+			} else {
+				return 0;
+			}
 		}
 		
 		protected void updateLight() {

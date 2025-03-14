@@ -24,9 +24,9 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
@@ -59,7 +59,7 @@ import net.neoforged.neoforge.fluids.FluidUtil;
 
 import javax.annotation.Nullable;
 
-public class WellBlock extends Block implements EntityBlock {
+public class WellBlock extends BaseEntityBlock {
 	
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 	public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
@@ -81,7 +81,7 @@ public class WellBlock extends Block implements EntityBlock {
 			SHAPE_INNER_SUPPORT
 	);
 	
-	private DyeColor color;
+	private final DyeColor color;
 	
 	public WellBlock(DyeColor color) {
 		super(BlockBehaviour.Properties.of()
@@ -101,22 +101,17 @@ public class WellBlock extends Block implements EntityBlock {
 	}
 	
 	@Override
-	protected MapCodec<? extends Block> codec() {
+	protected MapCodec<? extends BaseEntityBlock> codec() {
 		return ModBlocks.WELL_CODEC.value();
 	}
 	
+	@Nullable
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return state.getValue(HALF) == DoubleBlockHalf.LOWER ? new WellBlockEntity(pos, state) : null;
 	}
 	
-	// from BaseEntityBlock
 	@Nullable
-	@SuppressWarnings("unchecked")
-	private <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> serverType, BlockEntityType<E> clientType, BlockEntityTicker<? super E> ticker) {
-		return serverType == clientType ? (BlockEntityTicker<A>) ticker : null;
-	}
-	
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
 		return level.isClientSide ? null : createTickerHelper(type, ModBlocks.WELL_BE.get(), WellBlockEntity::serverTick);
@@ -127,6 +122,7 @@ public class WellBlock extends Block implements EntityBlock {
 		builder.add(AXIS, HALF, UPSIDE_DOWN);
 	}
 	
+	@Nullable
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext context) {
 		Level level = context.getLevel();
