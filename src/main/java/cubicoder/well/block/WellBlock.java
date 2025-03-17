@@ -66,12 +66,16 @@ public class WellBlock extends BaseEntityBlock {
 	public static final BooleanProperty UPSIDE_DOWN = BooleanProperty.create("upside_down");
 	
 	public static final VoxelShape SHAPE_BASE = Shapes.join(Shapes.block(), Block.box(3.0D, 2.0D, 3.0D, 13.0D, 16.0D, 13.0D), BooleanOp.ONLY_FIRST);
+	public static final VoxelShape SHAPE_BASE_UPSIDE_DOWN = flipShapeUpsideDown(SHAPE_BASE);
 	public static final VoxelShape SHAPE_INNER_SUPPORT = Shapes.or(
 			Block.box(7.5D, 0.0D, 1.0D, 8.5D, 15.0D, 2.0D),
 			Block.box(7.5D, 0.0D, 14.0D, 8.5D, 15.0D, 15.0D),
 			Block.box(7.5D, 7.0D, 2.0D, 8.5D, 8.0D, 14.0D),
 			Block.box(5.0D, 4.5D, 4.5D, 11.0D, 10.5D, 11.5D)
 	);
+	public static final VoxelShape SHAPE_INNER_SUPPORT_Z = flipShapeXZ(SHAPE_INNER_SUPPORT);
+	public static final VoxelShape SHAPE_INNER_SUPPORT_UPSIDE_DOWN = flipShapeUpsideDown(SHAPE_INNER_SUPPORT);
+	public static final VoxelShape SHAPE_INNER_SUPPORT_UPSIDE_DOWN_Z = flipShapeUpsideDown(SHAPE_INNER_SUPPORT_Z);
 	public static final VoxelShape SHAPE_ROOF = Shapes.or(
 			Block.box(5.5D, 12.5D, 0.0D, 10.5D, 15.707D, 16.0D),
 			Block.box(2.75D, 10.5D, 0.0D, 5.5D, 13.75D, 16.0D),
@@ -80,6 +84,9 @@ public class WellBlock extends BaseEntityBlock {
 			Block.box(13.25D, 8.0D, 0.0D, 16.0D, 11.25D, 16.0D),
 			SHAPE_INNER_SUPPORT
 	);
+	public static final VoxelShape SHAPE_ROOF_Z = flipShapeXZ(SHAPE_ROOF);
+	public static final VoxelShape SHAPE_ROOF_UPSIDE_DOWN = flipShapeUpsideDown(SHAPE_ROOF);
+	public static final VoxelShape SHAPE_ROOF_UPSIDE_DOWN_Z = flipShapeUpsideDown(SHAPE_ROOF_Z);
 	
 	private final DyeColor color;
 	
@@ -372,23 +379,19 @@ public class WellBlock extends BaseEntityBlock {
 	@Override
 	public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
-			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_BASE) : SHAPE_BASE;
+			return state.getValue(UPSIDE_DOWN) ? SHAPE_BASE_UPSIDE_DOWN : SHAPE_BASE;
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
-			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_ROOF) : SHAPE_ROOF;
-		} else {
-			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
-		}
+			return state.getValue(UPSIDE_DOWN) ? SHAPE_ROOF_UPSIDE_DOWN : SHAPE_ROOF;
+		} else return state.getValue(UPSIDE_DOWN) ? SHAPE_ROOF_UPSIDE_DOWN_Z : SHAPE_ROOF_Z;
 	}
 	
 	@Override
 	public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
-			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_BASE) : SHAPE_BASE;
+			return state.getValue(UPSIDE_DOWN) ? SHAPE_BASE_UPSIDE_DOWN : SHAPE_BASE;
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
-			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_INNER_SUPPORT) : SHAPE_INNER_SUPPORT;
-		} else {
-			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_INNER_SUPPORT)) : flipShapeXZ(SHAPE_INNER_SUPPORT);
-		}
+			return state.getValue(UPSIDE_DOWN) ? SHAPE_INNER_SUPPORT_UPSIDE_DOWN : SHAPE_INNER_SUPPORT;
+		} else return state.getValue(UPSIDE_DOWN) ? SHAPE_INNER_SUPPORT_UPSIDE_DOWN_Z : SHAPE_INNER_SUPPORT_Z;
 	}
 	
 	@Override
@@ -401,10 +404,8 @@ public class WellBlock extends BaseEntityBlock {
 		if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
 			return Shapes.block();
 		} else if (state.getValue(AXIS) == Direction.Axis.X) {
-			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(SHAPE_ROOF) : SHAPE_ROOF;
-		} else {
-			return state.getValue(UPSIDE_DOWN) ? flipShapeUpsideDown(flipShapeXZ(SHAPE_ROOF)) : flipShapeXZ(SHAPE_ROOF);
-		}
+			return state.getValue(UPSIDE_DOWN) ? SHAPE_ROOF_UPSIDE_DOWN : SHAPE_ROOF;
+		} else return state.getValue(UPSIDE_DOWN) ? SHAPE_ROOF_UPSIDE_DOWN_Z : SHAPE_ROOF_Z;
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -426,7 +427,7 @@ public class WellBlock extends BaseEntityBlock {
 	 * @param shape the shape to be flipped
 	 * @return the flipped VoxelShape
 	 */
-	public static VoxelShape flipShapeXZ(VoxelShape shape) {
+	private static VoxelShape flipShapeXZ(VoxelShape shape) {
 		VoxelShape[] buffer = new VoxelShape[]{ shape, Shapes.empty() };
 		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1], Shapes.create(minZ, minY, minX, maxZ, maxY, maxX)));
 		
@@ -439,7 +440,7 @@ public class WellBlock extends BaseEntityBlock {
 	 * @param shape the shape to be flipped
 	 * @return the flipped VoxelShape
 	 */
-	public static VoxelShape flipShapeUpsideDown(VoxelShape shape) {
+	private static VoxelShape flipShapeUpsideDown(VoxelShape shape) {
 		VoxelShape[] buffer = new VoxelShape[]{ shape, Shapes.empty() };
 		buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buffer[1] = Shapes.or(buffer[1], Shapes.create(minX, 1 - maxY, minZ, maxX, 1 - minY, maxZ)));
 		
