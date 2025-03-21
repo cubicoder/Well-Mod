@@ -85,25 +85,8 @@ configurations {
 }
 
 dependencies {
-    //compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
-
-    implementation "curse.maven:the-one-probe-245211:${top_fileid}"
-
-    implementation "curse.maven:jade-324717:${jade_fileid}"
-
-    implementation "curse.maven:catalogue-459701:${catalogue_fileid}"
-    implementation "curse.maven:configured-457570:${configured_fileid}"
-
-    implementation "curse.maven:pipez-443900:5757713"
-    implementation "curse.maven:largefluidtank-291006:6032344"
-    implementation "curse.maven:scalable-cats-force-320926:5982270"
-    implementation "curse.maven:biomes-o-plenty-220318:6152943"
-    implementation "curse.maven:terrablender-neoforge-940057:6054947"
-    implementation "curse.maven:glitchcore-955399:5660740"
-    implementation "curse.maven:mekanism-268560:6301273"
-    implementation "curse.maven:just-dire-things-1002348:6161633"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
