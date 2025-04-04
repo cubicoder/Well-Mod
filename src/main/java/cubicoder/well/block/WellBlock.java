@@ -370,7 +370,6 @@ public class WellBlock extends BaseEntityBlock {
 		return false;
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
@@ -408,7 +407,6 @@ public class WellBlock extends BaseEntityBlock {
 		} else return state.getValue(UPSIDE_DOWN) ? SHAPE_ROOF_UPSIDE_DOWN_Z : SHAPE_ROOF_Z;
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public BlockState rotate(BlockState state, Rotation rotation) {
 		return switch (rotation) {
