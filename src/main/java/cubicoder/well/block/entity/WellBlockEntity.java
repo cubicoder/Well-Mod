@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -116,6 +117,11 @@ public class WellBlockEntity extends BlockEntity {
 				}
 			});
 		}
+	}
+	
+	@Override
+	public boolean isValidBlockState(BlockState state) {
+		return state.getValue(WellBlock.HALF) == DoubleBlockHalf.LOWER;
 	}
 	
 	public boolean isUpsideDown() {
