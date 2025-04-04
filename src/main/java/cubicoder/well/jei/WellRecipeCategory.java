@@ -1,73 +1,41 @@
 package cubicoder.well.jei;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.mojang.serialization.Codec;
 import cubicoder.well.WellMod;
 import cubicoder.well.item.ModItems;
 import cubicoder.well.recipe.WellRecipe;
 import cubicoder.well.recipe.WellRecipeRegistration;
-import mezz.jei.api.constants.ModIds;
+import cubicoder.well.recipe.WellRecipeSerializer;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
-import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.drawable.IDrawableAnimated;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
+import mezz.jei.api.helpers.ICodecHelper;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
-import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
-public class WellRecipeCategory implements IRecipeCategory<WellRecipe> {
-	
-	public static final RecipeType<WellRecipe> RECIPE_TYPE = RecipeType.create(WellMod.MODID, WellRecipeRegistration.RECIPE_NAME, WellRecipe.class);
-	
-	private static final ResourceLocation RECIPE_GUI_VANILLA = ResourceLocation.fromNamespaceAndPath(ModIds.JEI_ID, "textures/jei/gui/gui_vanilla.png");
-	
-	private final IDrawable background;
-	private final IDrawable icon;
-	private final LoadingCache<Integer, IDrawableAnimated> cachedArrows;
+public class WellRecipeCategory extends AbstractRecipeCategory<WellRecipe> {
 	
 	public WellRecipeCategory(IGuiHelper guiHelper) {
-		background = guiHelper.createDrawable(RECIPE_GUI_VANILLA, 0 ,224, 82, 26);
-		icon = guiHelper.createDrawableItemStack(new ItemStack(ModItems.WELL.get()));
-		cachedArrows = CacheBuilder.newBuilder().build(
-				new CacheLoader<>() {
-					@Override
-					public IDrawableAnimated load(Integer time) {
-						return guiHelper.drawableBuilder(RECIPE_GUI_VANILLA, 82, 128, 24, 17).buildAnimated(time, IDrawableAnimated.StartDirection.LEFT, false);
-					}
-				}
+		super(
+				RecipeType.create(WellMod.MODID, WellRecipeRegistration.RECIPE_NAME, WellRecipe.class),
+				Component.translatable("gui.well.category.well"),
+				guiHelper.createDrawableItemLike(ModItems.WELL.get()),
+				82,
+				34
 		);
-	}
-	
-	@Override
-	public RecipeType<WellRecipe> getRecipeType() {
-		return RECIPE_TYPE;
-	}
-	
-	@Override
-	public Component getTitle() {
-		return Component.translatable("gui.well.category.well");
-	}
-	
-	@Override
-	public IDrawable getBackground() {
-		return background;
-	}
-	
-	@Override
-	public @Nullable IDrawable getIcon() {
-		return icon;
 	}
 	
 	@Override
@@ -92,35 +60,48 @@ public class WellRecipeCategory implements IRecipeCategory<WellRecipe> {
 				new ItemStack(ModItems.PINK_WELL.get())
 		);
 		
-		builder.addSlot(RecipeIngredientRole.CATALYST, 1, 5).addItemStacks(wells)
-				.addTooltipCallback(((recipeSlotView, tooltip) -> {
-					tooltip.add(Component.translatable("well.tooltip.generation"));
-					recipe.biomes().forEach(resLoc -> tooltip.add(Component.translatable(Util.makeDescriptionId("biome", resLoc))));
-					recipe.biomeTags().forEach(biomeTag -> tooltip.add(Component.literal(biomeTag.location().toString())));
-				}));
-		builder.addSlot(RecipeIngredientRole.OUTPUT, 61, 5).addFluidStack(recipe.result().getFluid(), recipe.result().getAmount())
-				.addTooltipCallback(((recipeSlotView, tooltip) -> tooltip.add(Component.translatable("jei.tooltip.liquid.amount", recipe.result().getAmount()))));
+		builder.addSlot(RecipeIngredientRole.CATALYST, 1, 9)
+				.setStandardSlotBackground()
+				.addItemStacks(wells);
+		builder.addOutputSlot(61, 9)
+				.setOutputSlotBackground()
+				.addFluidStack(recipe.result().getFluid(), recipe.result().getAmount());
 	}
 	
 	@Override
-	public void draw(WellRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-		cachedArrows.getUnchecked(recipe.maxTicks()).draw(guiGraphics, 24, 4);
+	public void createRecipeExtras(IRecipeExtrasBuilder builder, WellRecipe recipe, IFocusGroup focuses) {
+		builder.addAnimatedRecipeArrow(recipe.maxTicks()).setPosition(26, 9);
 	}
 	
 	@Override
-	public List<Component> getTooltipStrings(WellRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
-		List<Component> tooltipStrings = new ArrayList<>();
-		
+	public void getTooltip(ITooltipBuilder tooltip, WellRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
 		// if mouse is over arrow
-		if (mouseX >= 25 && mouseY >= 5 && mouseX <= 46 && mouseY <= 19) {
+		if (mouseX >= 26 && mouseY >= 9 && mouseX <= 47 && mouseY <= 24) {
+			// amount
+			tooltip.add(Component.translatable("jei.tooltip.liquid.amount", recipe.result().getAmount()));
+			
+			// time
 			if (recipe.minTicks() == recipe.maxTicks()) {
-				tooltipStrings.add(Component.translatable("well.tooltip.time", recipe.maxTicks()));
+				tooltip.add(Component.translatable("well.tooltip.time", recipe.maxTicks()));
 			} else {
-				tooltipStrings.add(Component.translatable("well.tooltip.time.range", recipe.minTicks(), recipe.maxTicks()));
+				tooltip.add(Component.translatable("well.tooltip.time.range", recipe.minTicks(), recipe.maxTicks()));
 			}
+			
+			// location
+			tooltip.add(Component.translatable("well.tooltip.generation"));
+			recipe.biomes().forEach(resLoc -> tooltip.add(Component.translatable(Util.makeDescriptionId("biome", resLoc))));
+			recipe.biomeTags().forEach(biomeTag -> tooltip.add(Component.literal(biomeTag.location().toString())));
 		}
-		
-		return tooltipStrings;
+	}
+	
+	@Override
+	public @Nullable ResourceLocation getRegistryName(WellRecipe recipe) {
+		return ResourceLocation.fromNamespaceAndPath(WellMod.MODID, BuiltInRegistries.FLUID.getKey(recipe.result().getFluid()).getPath());
+	}
+	
+	@Override
+	public Codec<WellRecipe> getCodec(ICodecHelper codecHelper, IRecipeManager recipeManager) {
+		return WellRecipeSerializer.CODEC.codec();
 	}
 	
 }
