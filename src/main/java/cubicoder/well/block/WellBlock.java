@@ -184,11 +184,9 @@ public class WellBlock extends BaseEntityBlock {
 			}
 			
 			// warn placer if only one well can function in the area
-			if (WellConfig.onlyOnePerChunk.get() && placer instanceof ServerPlayer) {
-				if (well.nearbyWells > 1) {
-					String message = state.getValue(UPSIDE_DOWN) ? "warn.well.onePerChunkFlipped" : "warn.well.onePerChunk";
-					((ServerPlayer) placer).displayClientMessage(Component.translatable(message), true);
-				}
+			if (WellConfig.wellsPerChunk.get() > 0 && well.nearbyWells > WellConfig.wellsPerChunk.get() && placer instanceof ServerPlayer serverPlayer) {
+				String message = state.getValue(UPSIDE_DOWN) ? "warn.well.wellsPerChunkFlipped" : "warn.well.wellsPerChunk";
+				serverPlayer.displayClientMessage(Component.translatable(message, WellConfig.wellsPerChunk.get()), true);
 			}
 		}
 	}

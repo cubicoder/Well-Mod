@@ -1,8 +1,6 @@
 {
-    "config.well.data": "Fluid Collection Data",
-    "config.well.data.tooltip": "Handle what fluids wells collect based on biome, and how much",
-    "config.well.onlyOnePerChunk": "Limit to One Well Per Chunk",
-    "config.well.onlyOnePerChunk.tooltip": "When set to true, all wells in the chunk will stop working while there's more than 1.",
+    "config.well.wellsPerChunk": "Wells Per Chunk",
+    "config.well.wellsPerChunk.tooltip": "How many wells are allowed per chunk? If 0, unlimited wells are allowed. Well counts are separate for regular and upside-down wells.",
     "config.well.playSound": "Play Cranking Sound",
     "config.well.playSound.tooltip": "Play the well cranking sound when someone takes fluid from a well.",
     "config.well.tankCapacity": "Fluid Tank Capacity",
@@ -29,8 +27,8 @@
     "block.well.yellow_well": "Yellow Well",
     
     "subtitle.block.well.crank": "Well crank squeaks",
-    "warn.well.onePerChunk": "Already one other right side up well in the same chunk as this one!",
-    "warn.well.onePerChunkFlipped": "Already one other upside down well in the same chunk as this one!",
+    "warn.well.wellsPerChunk": "Too many wells in this chunk! The max is: %s",
+    "warn.well.wellsPerChunkFlipped": "Too many upside down wells in this chunk! The max is: %s",
 
     "gui.well.category.well": "Well Generation",
 

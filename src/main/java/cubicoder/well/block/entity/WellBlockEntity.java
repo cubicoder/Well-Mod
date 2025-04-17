@@ -54,7 +54,7 @@ public class WellBlockEntity extends BlockEntity {
 			well.setChanged();
 		}
 		
-		if (well.fillTick <= 0 && (well.nearbyWells == 1 || !WellConfig.onlyOnePerChunk.get())) {
+		if (well.fillTick <= 0 && (WellConfig.wellsPerChunk.get() == 0 || well.nearbyWells <= WellConfig.wellsPerChunk.get())) {
 			FluidStack fluidToFill = well.getFluidToFill();
 			well.tank.allowFill = true;
 			int result = well.tank.fill(fluidToFill, IFluidHandler.FluidAction.EXECUTE);

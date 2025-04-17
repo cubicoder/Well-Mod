@@ -19,10 +19,10 @@ public class WellConfig {
 			.translation("config.well.tankCapacity")
 			.worldRestart()
 			.defineInRange("tankCapacity", 100000, 0, Integer.MAX_VALUE);
-	public static ModConfigSpec.BooleanValue onlyOnePerChunk = SERVER_BUILDER
-			.comment("When set to true, all wells in the chunk will stop working while there's more than 1.")
-			.translation("config.well.onlyOnePerChunk")
-			.define("onlyOnePerChunk", false);
+	public static ModConfigSpec.IntValue wellsPerChunk = SERVER_BUILDER
+			.comment("How many wells are allowed per chunk? If 0, unlimited wells are allowed. Well counts are separate for regular and upside-down wells.")
+			.translation("config.well.wellsPerChunk")
+			.defineInRange("wellsPerChunk", 0, 0, Integer.MAX_VALUE);
 	public static ModConfigSpec.BooleanValue allowWellFill = SERVER_BUILDER
 			.comment("When set to true, wells can be filled by buckets and pipes. Otherwise, wells can only be extracted from.")
 			.translation("config.well.allowWellFill")
