@@ -14,6 +14,7 @@ public class WellConfig {
 			.translation("config.well.playSound")
 			.define("playSound", true);
 	
+	// TODO make min 1 (don't forget to update lang)
 	public static ModConfigSpec.IntValue tankCapacity = SERVER_BUILDER
 			.comment("How many millibuckets of a fluid can wells hold? Set to 0 to disable.")
 			.translation("config.well.tankCapacity")

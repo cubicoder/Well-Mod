@@ -27,8 +27,8 @@
     "block.well.yellow_well": "Yellow Well",
     
     "subtitle.block.well.crank": "Well crank squeaks",
-    "warn.well.wellsPerChunk": "Too many wells in this chunk! The max is: %s",
-    "warn.well.wellsPerChunkFlipped": "Too many upside down wells in this chunk! The max is: %s",
+    "warn.well.wellsPerChunk": "Too many wells in this chunk! The max is %s",
+    "warn.well.wellsPerChunkFlipped": "Too many upside down wells in this chunk! The max is %s",
 
     "gui.well.category.well": "Well Generation",
 

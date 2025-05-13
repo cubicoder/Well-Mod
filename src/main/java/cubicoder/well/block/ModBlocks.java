@@ -1,5 +1,6 @@
 package cubicoder.well.block;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import cubicoder.well.WellMod;
@@ -9,9 +10,11 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.function.Supplier;
 
@@ -20,6 +23,8 @@ public class ModBlocks {
 	public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(WellMod.MODID);
 	public static final DeferredRegister<MapCodec<? extends Block>> BLOCK_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_TYPE, WellMod.MODID);
 	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, WellMod.MODID);
+	
+	public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, WellMod.MODID);
 	
 	public static final DeferredBlock<Block> WELL = BLOCKS.register("well", () -> new WellBlock(DyeColor.RED));
 	public static final DeferredBlock<Block> WHITE_WELL = BLOCKS.register("white_well", () -> new WellBlock(DyeColor.WHITE));
@@ -50,10 +55,14 @@ public class ModBlocks {
 					GRAY_WELL.get(), LIGHT_GRAY_WELL.get(), CYAN_WELL.get(), PURPLE_WELL.get(), BLUE_WELL.get(),
 					BROWN_WELL.get(), GREEN_WELL.get(), RED_WELL.get(), BLACK_WELL.get()).build(null));
 	
+	public static final Supplier<AttachmentType<Integer>> WELLS_IN_CHUNK = ATTACHMENT_TYPES.register(
+			"wells_per_chunk", () -> AttachmentType.builder(() -> 0).serialize(Codec.INT).build());
+	
 	public static void init(IEventBus modBus) {
 		BLOCKS.register(modBus);
 		BLOCK_TYPES.register(modBus);
 		BLOCK_ENTITIES.register(modBus);
+		ATTACHMENT_TYPES.register(modBus);
 	}
 	
 }

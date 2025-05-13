@@ -29,13 +29,11 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class WellBlockEntity extends BlockEntity {
 
 	public int fillTick = 0;
-	public int nearbyWells = 1;
 	public int delayUntilNextBucket = 0; // when filling an item from the well, delay before another can be filled
 	private final WellFluidTank tank;
 
@@ -44,7 +42,7 @@ public class WellBlockEntity extends BlockEntity {
 		tank = new WellFluidTank(this, WellConfig.tankCapacity.get());
 	}
 	
-	public static void serverTick(Level ignoredLevel, BlockPos ignoredPos, BlockState ignoredState, WellBlockEntity well) {
+	public static void serverTick(Level level, BlockPos pos, BlockState ignoredState, WellBlockEntity well) {
 		if (well.delayUntilNextBucket > 0) {
 			well.delayUntilNextBucket--;
 		}
@@ -54,14 +52,17 @@ public class WellBlockEntity extends BlockEntity {
 			well.setChanged();
 		}
 		
-		if (well.fillTick <= 0 && (WellConfig.wellsPerChunk.get() == 0 || well.nearbyWells <= WellConfig.wellsPerChunk.get())) {
-			FluidStack fluidToFill = well.getFluidToFill();
-			well.tank.allowFill = true;
-			int result = well.tank.fill(fluidToFill, IFluidHandler.FluidAction.EXECUTE);
-			well.tank.allowFill = false;
-			if (result > 0) {
-				well.initFillTick();
-				well.setChanged();
+		if (well.fillTick <= 0) {
+			if (WellConfig.wellsPerChunk.get() == 0 ||
+					level.getChunk(pos).getData(ModBlocks.WELLS_IN_CHUNK) <= WellConfig.wellsPerChunk.get()) {
+				FluidStack fluidToFill = well.getFluidToFill();
+				well.tank.allowFill = true;
+				int result = well.tank.fill(fluidToFill, IFluidHandler.FluidAction.EXECUTE);
+				well.tank.allowFill = false;
+				if (result > 0) {
+					well.initFillTick();
+					well.setChanged();
+				}
 			}
 		}
 	}
@@ -69,14 +70,17 @@ public class WellBlockEntity extends BlockEntity {
 	@Override
 	public void onLoad() {
 		tank.updateLight();
+		super.onLoad();
 	}
-
+	
 	private @Nullable WellRecipe getRecipe(WellRecipeInput input) {
 		if (level != null) {
 			RecipeManager recipes = level.getRecipeManager();
 			Predicate<RecipeHolder<WellRecipe>> fluidLighterThanAir = r -> isUpsideDown() == r.value().getResultFluid(level.registryAccess()).getFluid().getFluidType().isLighterThanAir();
 			List<RecipeHolder<WellRecipe>> list = recipes.getRecipesFor(WellRecipeRegistration.WELL_RECIPE_TYPE.get(), input, level).stream().filter(fluidLighterThanAir).toList();
 			if (!list.isEmpty()) {
+				// TODO log when list has more than one recipe (maybe)
+				//System.out.println("Recipes: " + list);
 				return list.getFirst().value();
 			}
 		}
@@ -96,6 +100,7 @@ public class WellBlockEntity extends BlockEntity {
 		return FluidStack.EMPTY;
 	}
 
+	// TODO consider moving this to onLoad with an initialized flag - only run when first created
 	public void initFillTick() {
 		if (level != null && !level.isClientSide) {
 			WellRecipeInput input = new WellRecipeInput(level.getBiome(getBlockPos()));
@@ -106,24 +111,12 @@ public class WellBlockEntity extends BlockEntity {
 		}
 	}
 	
-	public void countNearbyWells(Consumer<WellBlockEntity> updateScript) {
-		if (level != null) {
-			level.getChunkAt(getBlockPos()).getBlockEntitiesPos().forEach(otherPos -> {
-				if(!otherPos.equals(getBlockPos())) {
-					BlockEntity be = level.getBlockEntity(otherPos);
-					if (be instanceof WellBlockEntity well && well.isUpsideDown() == isUpsideDown()) {
-						updateScript.accept(well);
-					}
-				}
-			});
-		}
-	}
-	
 	@Override
 	public boolean isValidBlockState(BlockState state) {
 		return state.getValue(WellBlock.HALF) == DoubleBlockHalf.LOWER;
 	}
 	
+	// TODO don't call this in the block class?
 	public boolean isUpsideDown() {
 		return this.getBlockState().getValue(WellBlock.UPSIDE_DOWN);
 	}
@@ -132,7 +125,6 @@ public class WellBlockEntity extends BlockEntity {
 	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
 		super.loadAdditional(tag, registries);
 		fillTick = tag.getInt("FillTick");
-		nearbyWells = Math.max(1, tag.getInt("NearbyWells"));
 		tank.readFromNBT(registries, tag);
 	}
 
@@ -140,7 +132,6 @@ public class WellBlockEntity extends BlockEntity {
 	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
 		super.saveAdditional(tag, registries);
 		tag.putInt("FillTick", fillTick);
-		tag.putInt("NearbyWells", nearbyWells);
 		tank.writeToNBT(registries, tag);
 	}
 
@@ -205,6 +196,7 @@ public class WellBlockEntity extends BlockEntity {
 					} else {
 						FluidType fluidType = fluid.getFluidType();
 						int fluidLight = fluidType.getLightLevel(fluidType.getStateForPlacement(level, pos, fluid), level, pos);
+						// TODO check light formula (only calculate if fluidLight > 0, make sure min/max levels are good, maybe clamp to fluidLight instead of maxLightLevel)
 						lightManager.setLightAt(pos, Mth.clamp(((fluidLight - 1) * fluid.getAmount() / WellConfig.tankCapacity.get()) + 1, 1, level.getMaxLightLevel()));
 					}
 				}

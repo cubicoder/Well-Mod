@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
@@ -173,18 +174,11 @@ public class WellBlock extends BaseEntityBlock {
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
 		level.setBlockAndUpdate(pos.above(state.getValue(UPSIDE_DOWN) ? -1 : 1), state.setValue(HALF, DoubleBlockHalf.UPPER));
 		
-		BlockEntity be = level.getBlockEntity(pos);
-		if (be instanceof WellBlockEntity well) {
-			if (!level.isClientSide) {
-				well.initFillTick();
-				well.countNearbyWells(w -> {
-					w.nearbyWells++;
-					well.nearbyWells++;
-				});
-			}
-			
-			// warn placer if only one well can function in the area
-			if (WellConfig.wellsPerChunk.get() > 0 && well.nearbyWells > WellConfig.wellsPerChunk.get() && placer instanceof ServerPlayer serverPlayer) {
+		// warn placer if only one well can function in the area
+		if (!level.isClientSide) {
+			if (WellConfig.wellsPerChunk.get() > 0 &&
+					level.getChunk(pos).getData(ModBlocks.WELLS_IN_CHUNK) >= WellConfig.wellsPerChunk.get() &&
+					placer instanceof ServerPlayer serverPlayer) {
 				String message = state.getValue(UPSIDE_DOWN) ? "warn.well.wellsPerChunkFlipped" : "warn.well.wellsPerChunk";
 				serverPlayer.displayClientMessage(Component.translatable(message, WellConfig.wellsPerChunk.get()), true);
 			}
@@ -221,14 +215,26 @@ public class WellBlock extends BaseEntityBlock {
 	}
 	
 	@Override
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-		if (!state.is(newState.getBlock())) {
-			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof WellBlockEntity well) {
-				well.countNearbyWells(w -> w.nearbyWells--);
-			}
-			super.onRemove(state, level, pos, newState, isMoving);
+	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER && !state.is(oldState.getBlock())) {
+			ChunkAccess chunk = level.getChunk(pos);
+			chunk.setData(ModBlocks.WELLS_IN_CHUNK, chunk.getData(ModBlocks.WELLS_IN_CHUNK) + 1);
 		}
+		
+		if (level.getBlockEntity(pos) instanceof WellBlockEntity well) well.initFillTick();
+		
+		super.onPlace(state, level, pos, oldState, movedByPiston);
+	}
+	
+	@Override
+	protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER && !state.is(newState.getBlock())) {
+			ChunkAccess chunk = level.getChunk(pos);
+			chunk.setData(ModBlocks.WELLS_IN_CHUNK, chunk.getData(ModBlocks.WELLS_IN_CHUNK) - 1);
+			System.out.println("well removed, " + chunk.getData(ModBlocks.WELLS_IN_CHUNK));
+		}
+		
+		super.onRemove(state, level, pos, newState, isMoving);
 	}
 	
 	@Override
